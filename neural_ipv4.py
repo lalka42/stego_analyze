@@ -1,32 +1,4 @@
-'''
-Artificial Intelligence Techniques SL	
-artelnics@artelnics.com	
 
-Your model has been exported to this python file.
-You can manage it with the 'NeuralNetwork' class.	
-Example:
-
-	model = NeuralNetwork()	
-	sample = [input_1, input_2, input_3, input_4, ...]	
-	outputs = model.calculate_output(sample)
-
-	Inputs Names: 	
-	1 )ip.len
-	2 )ip.id
-	3 )ip.proto
-	4 )ip.dsfield.dscp
-	5 )ip.dsfield.ecn
-
-You can predict with a batch of samples using calculate_batch_output method	
-IMPORTANT: input batch must be <class 'numpy.ndarray'> type	
-Example_1:	
-	model = NeuralNetwork()	
-	input_batch = np.array([[1, 2], [4, 5]], np.int32)	
-	outputs = model.calculate_batch_output(input_batch)
-Example_2:	
-	input_batch = pd.DataFrame( {'col1': [1, 2], 'col2': [3, 4]})	
-	outputs = model.calculate_batch_output(input_batch.values)
-'''
 
 import numpy as np
 import pandas as pd
