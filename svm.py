@@ -4,6 +4,7 @@ from sklearn.metrics import recall_score
 import tkinter.filedialog as fd
 from sklearn.model_selection import train_test_split
 from sklearn.svm import SVC
+from sklearn.ensemble import HistGradientBoostingClassifier
 from joblib import dump, load
 import matplotlib.pyplot as plt
 from variable import variable
@@ -63,7 +64,7 @@ def udp_svm(filename):
         saved = fd.asksaveasfilename(
                 filetypes=(("Excel files", "*.xlsx"),
                            ("All files", "*.*")))
-        if savedsaved!='':
+        if saved!='':
             df.to_excel(saved + '.xlsx')
             
 def ipv4_svm(filename):
@@ -94,5 +95,36 @@ def ipv4_svm(filename):
         saved = fd.asksaveasfilename(
                 filetypes=(("Excel files", "*.xlsx"),
                            ("All files", "*.*")))
-        if savedsaved!='':
+        if saved!='':
+            df.to_excel(saved + '.xlsx')
+
+
+def all_boost(filename):
+    # Чтение преобразованного дампа
+    df = pd.read_csv(filename)
+    X = df.drop(['ip.src', 'ip.dst'], axis=1)
+
+    # Работа ML
+    boost = load('boost_all_train.joblib')
+    y_pred = boost.predict(X)
+    df['probability'] = y_pred.tolist()
+
+    # Построение графика
+    sum_prob = df['probability'].sum()
+    sum_all = df.shape[0]
+    labels = ["Всего пакетов", "С вложениями"]
+    vals = [sum_all, sum_prob]
+    fig, ax = plt.subplots()
+    explode = (0.1, 0)
+    ax.pie(vals, labels=labels, autopct='%1.1f%%', shadow=True, explode=explode)
+    plt.title("Метод Boost для всего")
+    text_g = 'Всего пакетов: ' + str(sum_all) + ' | Пакетов с вложениями: ' + str(sum_prob)
+    ax.text(-1.25, -1.2, text_g, fontsize=10)
+    plt.show()
+    if variable.check():
+        saved = fd.asksaveasfilename(
+            filetypes=(("Excel files", "*.xlsx"),
+                       ("All files", "*.*")))
+        print(saved)
+        if saved != '':
             df.to_excel(saved + '.xlsx')

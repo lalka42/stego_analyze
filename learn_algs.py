@@ -4,6 +4,7 @@ import tkinter.filedialog as fd
 
 #Алгоритмы обучения
 from sklearn.svm import SVC
+from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.neighbors import KNeighborsClassifier
 #Разделение на тренировочные наборы
 from sklearn.model_selection import train_test_split
@@ -15,21 +16,23 @@ from joblib import dump, load
 
 
 
-df = pd.read_excel("D:/Desktop/TCP.xlsx")
+df = pd.read_excel("D:/Desktop/test.xlsx")
+df['ip.dst'].replace('',np.nan, inplace = True)
+df.dropna(subset=['ip.dst'], inplace=True)
+df['ip.id'] = df['ip.id'].map(lambda x: int(x, 16))
 X = df.drop(['ip.src','ip.dst','counter'],axis = 1)
-
 y = df['counter']
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.20)
 
-#svm
+#boost
 
-svm = SVC(kernel = 'linear')
-svm.fit(X_train, y_train)
+boost = HistGradientBoostingClassifier()
+boost.fit(X_train, y_train)
 
 #svm = load('svm_ipv4_train.joblib')
-#dump(svm,'svm_ipv4_train.joblib')
+dump(boost,'boost_all_train.joblib')
 
-y_pred = svm.predict(X_test)
+y_pred = boost.predict(X_test)
 
 
 #kNN

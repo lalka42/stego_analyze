@@ -6,11 +6,13 @@ import tkinter.filedialog as fd
 from neural_tcp import tcp_nn
 from neural_udp import udp_nn
 from neural_ipv4 import ipv4_nn
-from knn import udp_knn, tcp_knn, ipv4_knn
-from svm import tcp_svm, udp_svm, ipv4_svm
+#from neural_all import nn
+from knn import udp_knn, tcp_knn, ipv4_knn, all_knn
+from svm import tcp_svm, udp_svm, ipv4_svm, all_boost
 from variable import variable
-import subprocess
 import os
+import time
+import subprocess
 
 
 dumpe_file = os.getcwd() + '\\dump.csv'
@@ -32,24 +34,28 @@ def analyze():
     method_var = combo.get()
     proto_var = selected.get()
     wd = os.getcwd()
-    wd= '"' + wd + '\\tshark' + '\\tshark.exe' + '"'
+    wd = '"' + wd + '\\Wireshark' + '\\tshark.exe' + '"'
     if variable.path is None:
         mb.showerror("Error",'Не выбран дамп для анализа')
         
     #Обработка по нейронке
     if method_var == 'Нейронная сеть':
         if proto_var == 1:
-            wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e tcp.srcport -e tcp.dstport -e tcp.ack -e tcp.urgent_pointer -e tcp.window_size_value -e ip.src -e ip.dst >" + dumpe_file
-            os.system(wd)
+            wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e tcp.srcport -e tcp.dstport -e tcp.ack -e tcp.urgent_pointer -e tcp.window_size_value -e ip.src -e ip.dst > " + '"' + dumpe_file + '"'
+            subprocess.call(wd, shell = True)
             tcp_nn(dumpe_file)
         elif proto_var == 2:
-            wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e udp.srcport -e udp.dstport -e ip.src -e ip.dst >" + dumpe_file
-            os.system(wd)
+            wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e udp.srcport -e udp.dstport -e ip.src -e ip.dst >" + '"' + dumpe_file + '"'
+            subprocess.call(wd, shell = True)
             udp_nn(dumpe_file)
         elif proto_var == 3:
-            wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e ip.len -e ip.id -e ip.proto -e ip.dsfield.dscp -e ip.dsfield.ecn -e ip.src -e ip.dst >" + dumpe_file
-            os.system(wd)
+            wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e ip.len -e ip.id -e ip.proto -e ip.dsfield.dscp -e ip.dsfield.ecn -e ip.src -e ip.dst >" + '"' + dumpe_file + '"'
+            subprocess.call(wd, shell = True)
             ipv4_nn(dumpe_file)
+        elif proto_var == 4:
+            wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e udp.srcport -e udp.dstport -e tcp.srcport -e tcp.dstport -e tcp.ack -e tcp.urgent_pointer -e tcp.window_size_value -e ip.len -e ip.id -e ip.proto -e ip.dsfield.dscp -e ip.dsfield.ecn -e ip.src -e ip.dst >" + '"' + dumpe_file + '"'
+            subprocess.call(wd, shell = True)
+            udp_nn(dumpe_file)
         else:
             mb.showerror("Error",'Не выбран протокол')
    
@@ -58,21 +64,29 @@ def analyze():
         
         #TCP
         if proto_var == 1:
-            wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e tcp.srcport -e tcp.dstport -e tcp.ack -e tcp.urgent_pointer -e tcp.window_size_value -e ip.src -e ip.dst > " + dumpe_file
-            os.system(wd)
+            wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e tcp.srcport -e tcp.dstport -e tcp.ack -e tcp.urgent_pointer -e tcp.window_size_value -e ip.src -e ip.dst > "  + '"' + dumpe_file + '"'
+            subprocess.call(wd, shell = True)
             tcp_svm(dumpe_file)
         
         #UDP
         elif proto_var == 2:
-            wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e udp.srcport -e udp.dstport -e ip.src -e ip.dst >" + dumpe_file
-            os.system(wd)
+            wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e udp.srcport -e udp.dstport -e ip.src -e ip.dst >"  + '"' + dumpe_file + '"'
+            subprocess.call(wd, shell = True)
             udp_svm(dumpe_file)
         
         #IPv4   
         elif proto_var == 3:
-            wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e ip.len -e ip.id -e ip.proto -e ip.dsfield.dscp -e ip.dsfield.ecn -e ip.src -e ip.dst >" + dumpe_file
-            os.system(wd)
+            wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e ip.len -e ip.id -e ip.proto -e ip.dsfield.dscp -e ip.dsfield.ecn -e ip.src -e ip.dst > "  + '"' + dumpe_file + '"'
+            print(wd)
+            subprocess.call(wd, shell = True)
             ipv4_svm(dumpe_file)
+
+        #ALL
+        elif proto_var == 4:
+            wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e udp.srcport -e udp.dstport -e tcp.srcport -e tcp.dstport -e tcp.ack -e tcp.urgent_pointer -e tcp.window_size_value -e ip.len -e ip.id -e ip.proto -e ip.dsfield.dscp -e ip.dsfield.ecn -e ip.src -e ip.dst > "  + '"' + dumpe_file + '"'
+            print(wd)
+            subprocess.call(wd, shell = True)
+            all_boost(dumpe_file)
         else:
             mb.showerror("Error",'Не выбран протокол')
     
@@ -81,21 +95,27 @@ def analyze():
         
         #TCP
         if proto_var == 1:
-            wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e tcp.srcport -e tcp.dstport -e tcp.ack -e tcp.urgent_pointer -e tcp.window_size_value -e ip.src -e ip.dst >" + dumpe_file
-            os.system(wd)
+            wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e tcp.srcport -e tcp.dstport -e tcp.ack -e tcp.urgent_pointer -e tcp.window_size_value -e ip.src -e ip.dst >"  + '"' + dumpe_file + '"'
+            subprocess.call(wd, shell = True)
             tcp_knn(dumpe_file)
         
         #UDP
         elif proto_var == 2:
-            wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e udp.srcport -e udp.dstport -e ip.src -e ip.dst >" + dumpe_file
-            os.system(wd)
+            wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e udp.srcport -e udp.dstport -e ip.src -e ip.dst >"  + '"' + dumpe_file + '"'
+            subprocess.call(wd, shell = True)
             udp_knn(dumpe_file)
         
         #IPv4
         elif proto_var == 3:
-            wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e ip.len -e ip.id -e ip.proto -e ip.dsfield.dscp -e ip.dsfield.ecn -e ip.src -e ip.dst >" + dumpe_file
-            os.system(wd)
+            wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e ip.len -e ip.id -e ip.proto -e ip.dsfield.dscp -e ip.dsfield.ecn -e ip.src -e ip.dst >"  + '"' + dumpe_file + '"'
+            subprocess.call(wd, shell = True)
             ipv4_knn(dumpe_file)
+
+        #ALL
+        elif proto_var == 4:
+            wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e udp.srcport -e udp.dstport -e tcp.srcport -e tcp.dstport -e tcp.ack -e tcp.urgent_pointer -e tcp.window_size_value -e ip.len -e ip.id -e ip.proto -e ip.dsfield.dscp -e ip.dsfield.ecn -e ip.src -e ip.dst >"  + '"' + dumpe_file + '"'
+            subprocess.call(wd, shell = True)
+            all_knn(dumpe_file)
         else:
             mb.showerror("Error",'Не выбран протокол')
     else:
@@ -125,10 +145,12 @@ selected = IntVar()
 rad1 = Radiobutton(window, text='tcp', value=1, variable = selected)  
 rad2 = Radiobutton(window, text='udp', value=2, variable = selected)
 rad3 = Radiobutton(window, text='ipv4', value=3, variable = selected)  
+rad4 = Radiobutton(window, text='ALL', value=4, variable = selected)
 
 rad1.place(x=100, y=110, anchor=CENTER)
 rad2.place(x=200, y=110, anchor=CENTER)
 rad3.place(x=300, y=110, anchor=CENTER)
+rad4.place(x=400, y=110, anchor=CENTER)
 
 lbl = Label(window, text=" ")  
 lbl.grid(column=0, row=4)  
@@ -147,7 +169,7 @@ anal = Button(window, text="Анализ", bg = "#ffa500", font=('Arial Bold', 1
 anal.place(x=200,y=230, anchor=CENTER)
 
 #Отрисовка окна
-window.minsize(400, 300)
-window.maxsize(400, 300)
+window.minsize(450, 300)
+window.maxsize(450, 300)
 window.mainloop()
 

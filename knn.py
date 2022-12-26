@@ -95,3 +95,31 @@ def ipv4_knn(filename):
                            ("All files", "*.*")))
         if saved!='':
             df.to_excel(saved + '.xlsx')
+
+
+def all_knn(filename):
+    df = pd.read_csv(filename)
+    X = df.drop(['ip.src', 'ip.dst'], axis=1)
+    knn = load('knn_all_train.joblib')
+    y_pred = knn.predict(X)
+    df['probability'] = y_pred.tolist()
+
+    # Построение графика
+    sum_prob = df['probability'].sum()
+    sum_all = df.shape[0]
+    labels = ["Всего пакетов", "С вложениями"]
+    vals = [sum_all, sum_prob]
+    fig, ax = plt.subplots()
+    explode = (0.1, 0)
+    ax.pie(vals, labels=labels, autopct='%1.1f%%', shadow=True, explode=explode)
+    plt.title("Метод k-NN для всего")
+    text_g = 'Всего пакетов: ' + str(sum_all) + ' | Пакетов с вложениями: ' + str(sum_prob)
+    ax.text(-1.25, -1.2, text_g, fontsize=10)
+    plt.show()
+
+    if variable.check():
+        saved = fd.asksaveasfilename(
+            filetypes=(("Excel files", "*.xlsx"),
+                       ("All files", "*.*")))
+        if saved != '':
+            df.to_excel(saved + '.xlsx')
