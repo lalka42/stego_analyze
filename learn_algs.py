@@ -16,7 +16,7 @@ from joblib import dump, load
 
 
 
-df = pd.read_excel("D:/Desktop/test.xlsx")
+#df = pd.read_excel("D:/Desktop/")
 df['ip.dst'].replace('',np.nan, inplace = True)
 df.dropna(subset=['ip.dst'], inplace=True)
 df['ip.id'] = df['ip.id'].map(lambda x: int(x, 16))
