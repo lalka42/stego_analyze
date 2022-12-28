@@ -44,36 +44,38 @@ lbl = Label(window, text=" ")
 lbl.grid(column=0, row=0)  
 
 #Кнопка выбора дампа
-dump = Button(window, text="Выбрать дамп", bg = "#ffa500", font=('Arial Bold', 16), fg = 'white', command=dumped)
-dump.place(x=200,y=50, anchor=CENTER)
+Button(window, text="Выбрать дамп", bg = "#ffa500", font=('Arial Bold', 16), fg = 'white', command=dumped).place(x=200,y=50, anchor=CENTER)
+
 
 lbl = Label(window, text=" ")  
 lbl.grid(column=0, row=2)
 
 #Кнопка закрытия программы
-close = Button(window, text="Закрыть программу", command=quit)
-close.place(x=320,y=280, anchor=CENTER)
+Button(window, text="Закрыть программу", command=quit).place(x=425,y=500, anchor=CENTER)
+
 
 #Выбор протокола
-knn_on = BooleanVar()
-knn_on.set(1)
-svm_on = BooleanVar()
-svm_on.set(0)
-c1 = Checkbutton(window, text='K-NN',variable= knn_on, onvalue=1, offvalue=0)
-#c1.pack()
-c2 = Checkbutton(window, text='Save_res',variable= svm_on, onvalue=1, offvalue=0)
-#c2.pack()
+program_mode=1
 
-c1.place(x=100, y=110, anchor=CENTER)
-c2.place(x=200, y=110, anchor=CENTER)
-
+frame=Frame(window, width=0, height=0, bg='#7FFFD4')
+frame.place(x=345, y=100)
+ARBEES=[
+('Анализ', '1'),
+('Обучение', '2'),
+]
+for text, mode in ARBEES:
+	rbGroup=Radiobutton(frame, text=text, variable=program_mode, value=mode, bg='#7FFFD4', font=('arial', 12, 'normal')).pack(side='left', anchor = 'w')
 
 #Кнопка анализа
-anal = Button(window, text="Анализ", bg = "#ffa500", font=('Arial Bold', 16),fg = 'white', command = analyze)
-anal.place(x=200,y=230, anchor=CENTER)
+Button(window, text="ПУСК", bg = "#ffa500", font=('GOST', 16),fg = 'white', command = analyze).place(x=425,y=450, anchor=CENTER)
+
 
 #Отрисовка окна
-window.minsize(400, 300)
-window.maxsize(400, 300)
+Label(window, text='Пожалуйста, выберите режим работы программы', bg='#7FFFD4', font=('arial', 12, 'normal')).place(x=270, y=65)
+Label(window, text='Обучение', bg='#7FFFD4', font=('arial', 16, 'normal')).place(x=621, y=145)
+Label(window, text='Анализ', bg='#7FFFD4', font=('arial', 16, 'normal')).place(x=82, y=145)
+
+window.geometry('850x530')
+window.configure(background='#7FFFD4')
 window.mainloop()
 
