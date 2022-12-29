@@ -1,6 +1,4 @@
 from tkinter import *
-import tkinter
-from tkinter.ttk import Combobox  
 from tkinter.ttk import Checkbutton
 import tkinter.filedialog as fd
 from variable import variable
@@ -9,7 +7,7 @@ import os
 import time
 import subprocess
 from tkinter import messagebox
-import sys
+
 
 
 dumpe_file = os.getcwd() + '\\dump.csv'
@@ -38,6 +36,8 @@ def saved():
 
 #Кнопка ПУСК
 def analyze():
+    variable.change_save_diag(Check_savediag.get())
+    variable.change_mean_diag(Check_diag.get())
     if variable.path == None:
         messagebox.showerror("Ошибка", "Не выбран дамп для анализа")
         return None
@@ -47,9 +47,11 @@ def analyze():
     else:
      wd = os.getcwd()
      wd = '"' + wd + '\\Wireshark' + '\\tshark.exe' + '"'
-     wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e udp.srcport -e udp.dstport -e tcp.srcport -e tcp.dstport -e tcp.ack -e tcp.urgent_pointer -e tcp.window_size_value -e ip.len -e ip.id -e ip.proto -e ip.dsfield.dscp -e ip.dsfield.ecn -e ip.src -e ip.dst > "  + '"' + dumpe_file + '"'
+     wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e udp.srcport -e udp.dstport -e ip.src -e ip.dst >" + '"' + dumpe_file + '"'
+    # wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e udp.srcport -e udp.dstport -e tcp.srcport -e tcp.dstport -e tcp.ack -e tcp.urgent_pointer -e tcp.window_size_value -e ip.len -e ip.id -e ip.proto -e ip.dsfield.dscp -e ip.dsfield.ecn -e ip.src -e ip.dst > "  + '"' + dumpe_file + '"'
      subprocess.call(wd, shell=True)
      knn(dumpe_file)
+
 
 #Отрисовка окна
 window = Tk()
@@ -89,13 +91,12 @@ window.geometry('850x530')
 window.configure(background='#7FFFD4')
 
 Check_diag = IntVar()
-Checkbutton(window, text='Нужно ли вывести диаграмму?', variable=Check_diag).place(x=40, y=260)
-
+Checkbutton(window, text='Нужно ли вывести диаграмму?',onvalue=1, offvalue=0, variable=Check_diag).place(x=40, y=260)
 
 Check_savediag = IntVar()
-Checkbutton(window, text='Нужно ли сохранить диаграмму?', variable=Check_savediag).place(x=40, y=280)
+Checkbutton(window, text='Нужно ли сохранить диаграмму?',onvalue=1, offvalue=0, variable=Check_savediag).place(x=40, y=280)
 
-file_name = IntVar()
+variable.change_save_diag(Check_savediag)
 
 
 window.mainloop()
