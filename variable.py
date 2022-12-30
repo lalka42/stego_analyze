@@ -8,6 +8,9 @@ class Variable():
         self.quit = 0
         self.save_diag = 0
         self.mean_diag = 0
+        self.svm_count = 0
+        self.knn_count = 0
+        self.boost_count = 0
 
     def change_path(self, path):
         self.path = path
@@ -25,5 +28,14 @@ class Variable():
 
     def change_combo(self, combo):
         self.combo = combo
+
+    def change_svm_count(self, svm):
+        self.svm_count = svm
+
+    def change_knn_count(self, knn):
+        self.knn_count = knn
+
+    def change_boost_count(self, bost):
+        self.boost_count = bost
 
 variable = Variable()

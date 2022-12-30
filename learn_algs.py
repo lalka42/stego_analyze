@@ -24,6 +24,7 @@ X = df.drop(['ip.src','ip.dst','counter'],axis = 1)
 y = df['counter']
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size = 0.20)
 
+
 #boost
 
 boost = HistGradientBoostingClassifier()
