@@ -3,20 +3,23 @@ from tkinter import messagebox as mb
 class Variable():
     def __init__(self, **kwargs):
         self.path = kwargs.get('path')
+        self.dataset_path = kwargs.get('path')
         self.combo = kwargs.get('combo')
         self.path_of_save = kwargs.get('path')
         self.quit = 0
         self.save_diag = 0
         self.mean_diag = 0
-        self.svm_count = 0
-        self.knn_count = 0
-        self.boost_count = 0
+        self.svm_count=float
+        self.knn_count=float
+        self.boost_count=float
 
     def change_path(self, path):
         self.path = path
         '''if self.path is not None:
             self.path = '"' + self.path + '"'''
 
+    def change_dataset_path(self, path):
+        self.dataset_path = path
     def change_save_path(self, path):
         self.path_of_save = path
 

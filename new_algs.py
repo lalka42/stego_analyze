@@ -4,51 +4,71 @@ from sklearn.metrics import recall_score
 import tkinter.filedialog as fd
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+from sklearn.ensemble import HistGradientBoostingClassifier
 from joblib import dump, load
 import matplotlib.pyplot as plt
 from variable import variable
-import datetime
+from time import localtime, strftime
 
+def calc(filename):
 
-def knn(filename):
     df = pd.read_csv(filename)
-    #df['ip.dst'].replace('', np.nan, inplace=True)
-    #df.dropna(subset=['ip.dst'], inplace=True)
-    #df['ip.id'] = df['ip.id'].map(lambda x: int(x, 16))
-    X = df.drop(['ip.src', 'ip.dst'], axis=1)
-    knn = load('knn_udp_train.joblib')
-    y_pred = knn.predict(X)
-    df['probability'] = y_pred.tolist()
-    if variable.mean_diag != 0 or variable.save_diag != 0:
-     plot(df)
-
-
-
-def svm(filename):
-    df = pd.read_csv(filename)
+    outputs = df
+    df['ip.dst'].replace('', np.nan, inplace=True)
+    #df = df.dropna(subset=['ip.dst'], inplace=True)
     df['ip.id'] = df['ip.id'].map(lambda x: int(x, 16))
     X = df.drop(['ip.src', 'ip.dst'], axis=1)
-    svm = load('svm_tcp_train.joblib')
-    y_pred = svm.predict(X)
-    df['probability'] = y_pred.tolist()
+    svm = load('svm_model.joblib')
+    knn = load('knn_model.joblib')
+    boost = load('boost_model.joblib')
+    y_pred_svm = svm.predict(X)
+    outputs['svm_probability'] = y_pred_svm.tolist()
+    y_pred_knn = knn.predict(X)
+    outputs['knn_probability'] = y_pred_svm.tolist()
+    y_pred_boost = boost.predict(X)
+    outputs['boost_probability'] = y_pred_svm.tolist()
+    save_res(outputs)
+    if variable.mean_diag != 0 or variable.save_diag != 0:
+     plot(outputs)
 
+def learn(filename):
+    svm = SVC(kernel='linear')
+    knn = KNeighborsClassifier(n_neighbors=4)
+    boost = HistGradientBoostingClassifier()
+    df = pd.read_excel(filename)
+    df['ip.id'] = df['ip.id'].map(lambda x: int(x, 16))
+    X = df.drop(['ip.src', 'ip.dst','counter'], axis=1)
+    y = df['counter']
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=float(variable.svm_count))
+    svm.fit(X_train, y_train)
+    dump(svm,'svm_model.joblib')
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=float(variable.knn_count))
+    knn.fit(X_train, y_train)
+    dump(knn,'knn_model.joblib')
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=float(variable.boost_count))
+    boost.fit(X_train, y_train)
+    dump(boost,'boost_model.joblib')
 
 
 def plot(df):
-    sum_prob = df['probability'].sum()
+    sum_prob_svm = df['svm_probability'].sum()
+    sum_prob_knn = df['knn_probability'].sum()
+    sum_prob_boost = df['boost_probability'].sum()
     sum_all = df.shape[0]
-    labels = ["Всего пакетов", "С вложениями"]
-    vals = [sum_all, sum_prob]
+    labels = ["Всего пакетов", "Обнаружил SVM:", "Обнаружил k-NN:", "Обнаружил Boost:"]
+    vals = [sum_all, sum_prob_svm, sum_prob_knn, sum_prob_boost]
     fig, ax = plt.subplots()
-    explode = (0.1, 0)
+    explode = None
     ax.pie(vals, labels=labels, autopct='%1.1f%%', shadow=True, explode=explode)
     plt.title("Вычисление ")
-    text_g = 'Всего пакетов: ' + str(sum_all) + ' | Пакетов с вложениями: ' + str(sum_prob)
-    ax.text(-1.25, -1.2, text_g, fontsize=10)
+    text_g = 'Всего: ' + str(sum_all) + ' | Обнаружил SVM: ' + str(sum_prob_svm) + ' | Обнаружил k-NN: ' + str(sum_prob_knn) + ' | Обнаружил Boost: ' + str(sum_prob_boost)
+    ax.text(-2.2, -1.2, text_g, fontsize=10)
     if variable.mean_diag == 1:
         plt.show()
     if variable.save_diag == 1:
-        plt.savefig(datetime.strftime.now("%d-%m-%Y %H:%M") + '.png')
+        plt.savefig(variable.path_of_save + '/' + strftime("%Y-%m-%d_%H-%M-%S", localtime()) + '.png')
 
 def save_res(df):
-    df.to_excel(variable.path_of_save + datetime.strftime.now("%d-%m-%Y %H:%M") + '.xlsx')
+    df.to_excel(variable.path_of_save + '/' + strftime("%Y-%m-%d_%H-%M-%S", localtime()) + '.xlsx')
