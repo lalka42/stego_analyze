@@ -75,7 +75,7 @@ def analyze():
             #wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e tcp.srcport -e tcp.dstport -e tcp.ack -e tcp.urgent_pointer -e tcp.window_size_value -e ip.src -e ip.dst >" + '"' + dumpe_file + '"'
             #wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e udp.srcport -e udp.dstport -e ip.src -e ip.dst >" + '"' + dumpe_file + '"'
             #wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e udp.srcport -e udp.dstport -e tcp.srcport -e tcp.dstport -e tcp.ack -e tcp.urgent_pointer -e tcp.window_size_value -e ip.len -e ip.id -e ip.proto -e ip.dsfield.dscp -e ip.dsfield.ecn -e ip.src -e ip.dst > "  + '"' + dumpe_file + '"'
-            wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e ip.len -e ip.id -e ip.proto -e ip.dsfield.dscp -e ip.dsfield.ecn -e ip.src -e ip.dst >" + '"' + dumpe_file + '"'
+            #wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e ip.len -e ip.id -e ip.tos -e ip.src -e ip.dst >" + '"' + dumpe_file + '"'
             subprocess.call(wd, shell=True)
             calc(dumpe_file)
             rb1['state'] = tkinter.NORMAL
@@ -93,9 +93,6 @@ def analyze():
             learn(variable.dataset_path)
             rb1['state'] = tkinter.NORMAL
             rb2['state'] = tkinter.NORMAL
-
-
-
 
 
 #Отрисовка окна

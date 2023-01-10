@@ -9,9 +9,9 @@ class Variable():
         self.quit = 0
         self.save_diag = 0
         self.mean_diag = 0
-        self.svm_count=float
-        self.knn_count=float
-        self.boost_count=float
+        self.svm_count = float
+        self.knn_count = float
+        self.boost_count = float
 
     def change_path(self, path):
         self.path = path
