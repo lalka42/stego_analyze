@@ -6,7 +6,7 @@ arr = []
 while sym:
  arr.extend('{:08b}'.format(ord(sym)))
  sym = file.read(1)
-
+cnt = 0
 while len(arr) > 0:
 #length
  a = int(arr.pop(0))
@@ -63,9 +63,11 @@ while len(arr) > 0:
  udptwo = random.randint(1,1024)
  tcpone = random.randint(1,1024)
  tcptwo = random.randint(1,1024)
- pktcp = IP(src="192.168.50.153", dst="192.168.50.15", len=length, tos=tos, id=ident) / TCP(sport=tcpone,dport=tcptwo, ack=ack, urgptr=urg,window=wind,flags="AU")
- pkudp = IP(src="192.168.50.153", dst="192.168.50.15") /UDP(sport=udpone,dport=udptwo)
+ pktcp = IP(src="192.168.88.248", dst="192.168.88.246", len=length, tos=tos, id=ident) / TCP(sport=tcpone,dport=tcptwo, ack=ack, urgptr=urg,window=wind,flags="AU")
+ pkudp = IP(src="192.168.88.248", dst="192.168.88.246") /UDP(sport=udpone, dport=udptwo, len=8)
  time.sleep(random.uniform(0.10,0.20))
  send(pktcp)
  time.sleep(random.uniform(0.10,0.20))
  send(pkudp)
+ cnt=cnt+2
+ print(cnt)

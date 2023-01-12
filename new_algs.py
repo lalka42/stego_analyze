@@ -48,7 +48,7 @@ def learn(filename):
 
     check_test = pd.DataFrame(
         {
-            "y_test": y_test["price"],
+            "y_test": y_test,
             "y_pred": y_pred.flatten(),
         })
 
@@ -56,19 +56,36 @@ def learn(filename):
     check_test["error"] = check_test["y_pred"] - check_test["y_test"]
     r2_score_1 = r2_score(check_test["y_pred"], check_test["y_test"])
     print("R2 Score: " + str(r2_score_1))
-    print(check_test.head(10))
+
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=float(variable.knn_count))
+    knn.fit(X_train, y_train)
+    dump(knn,'knn_model.joblib')
+    y_pred = knn.predict(X_test)
+
+    check_test = pd.DataFrame(
+        {
+            "y_test": y_test,
+            "y_pred": y_pred.flatten(),
+        })
 
     r2_score_2 = r2_score(check_test["y_pred"], check_test["y_test"])
     print("R2 Score: " + str(r2_score_2))
     print(check_test.head(10))
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=float(variable.knn_count))
-    knn.fit(X_train, y_train)
-    dump(knn,'knn_model.joblib')
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=float(variable.boost_count))
     boost.fit(X_train, y_train)
     dump(boost,'boost_model.joblib')
+    y_pred = boost.predict(X_test)
 
+    check_test = pd.DataFrame(
+        {
+            "y_test": y_test,
+            "y_pred": y_pred.flatten(),
+        })
+
+    r2_score_3 = r2_score(check_test["y_pred"], check_test["y_test"])
+    print("R2 Score: " + str(r2_score_3))
+    print(check_test.head(10))
 
 def plot(df):
     sum_prob_svm = df['svm_probability'].sum()

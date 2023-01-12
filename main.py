@@ -75,7 +75,7 @@ def analyze():
             #wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e tcp.srcport -e tcp.dstport -e tcp.ack -e tcp.urgent_pointer -e tcp.window_size_value -e ip.src -e ip.dst >" + '"' + dumpe_file + '"'
             #wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e udp.srcport -e udp.dstport -e ip.src -e ip.dst >" + '"' + dumpe_file + '"'
             #wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e udp.srcport -e udp.dstport -e tcp.srcport -e tcp.dstport -e tcp.ack -e tcp.urgent_pointer -e tcp.window_size_value -e ip.len -e ip.id -e ip.proto -e ip.dsfield.dscp -e ip.dsfield.ecn -e ip.src -e ip.dst > "  + '"' + dumpe_file + '"'
-            #wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e ip.len -e ip.id -e ip.tos -e ip.src -e ip.dst >" + '"' + dumpe_file + '"'
+            wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e ip.len -e ip.id -e ip.tos -e ip.src -e ip.dst >" + '"' + dumpe_file + '"'
             subprocess.call(wd, shell=True)
             calc(dumpe_file)
             rb1['state'] = tkinter.NORMAL
@@ -141,13 +141,13 @@ dataset_choice_button = Button(window, text="Выбрать датасет", bg=
 dataset_choice_button.place(x=675, y=230, anchor=CENTER)
 
 Label(window, text='Размер обучающей выборки для svm', bg='#7FFFD4', font=('arial', 9, 'normal')).place(x=570, y=287)
-spin_svm = Spinbox(window, increment=0.1, state=DISABLED, from_= 0.1, to_= 0.9, font=('arial', 12, 'normal'), bg='#F0F8FF', width=10)
+spin_svm = Spinbox(window, increment=0.1, state=DISABLED, from_= 0.25, to_= 0.9, font=('arial', 12, 'normal'), bg='#F0F8FF', width=10)
 spin_svm.place(x=625, y=310)
 Label(window, text='Размер обучающей выборки для k-NN', bg='#7FFFD4', font=('arial', 9, 'normal')).place(x=570, y=337)
-spin_knn = Spinbox(window, increment=0.1, state=DISABLED, from_= 0.1, to_= 0.9, font=('arial', 12, 'normal'), bg='#F0F8FF', width=10)
+spin_knn = Spinbox(window, increment=0.1, state=DISABLED, from_= 0.25, to_= 0.9, font=('arial', 12, 'normal'), bg='#F0F8FF', width=10)
 spin_knn.place(x=625, y=360)
 Label(window, text='Размер обучающей выборки для boost', bg='#7FFFD4', font=('arial', 9, 'normal')).place(x=570, y=387)
-spin_boost = Spinbox(window, increment=0.1, state=DISABLED, from_= 0.1, to_= 0.9, font=('arial', 12, 'normal'), bg='#F0F8FF', width=10)
+spin_boost = Spinbox(window, increment=0.1, state=DISABLED, from_= 0.25, to_= 0.9, font=('arial', 12, 'normal'), bg='#F0F8FF', width=10)
 spin_boost.place(x=625, y=410)
 
 Check_diag = IntVar()
