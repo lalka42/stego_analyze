@@ -12,6 +12,8 @@ class Variable():
         self.svm_count = float
         self.knn_count = float
         self.boost_count = float
+        self.prepare_set_path = kwargs.get('path')
+        self.prepare_set_save_path = kwargs.get('path')
 
     def change_path(self, path):
         self.path = path
@@ -20,6 +22,7 @@ class Variable():
 
     def change_dataset_path(self, path):
         self.dataset_path = path
+
     def change_save_path(self, path):
         self.path_of_save = path
 
@@ -40,5 +43,11 @@ class Variable():
 
     def change_boost_count(self, bost):
         self.boost_count = bost
+
+    def change_prepare_set_path(self, path):
+        self.prepare_set_path = path
+
+    def change_save_prepare_path(self, path):
+        self.prepare_set_save_path = path
 
 variable = Variable()

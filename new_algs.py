@@ -19,7 +19,8 @@ def calc(filename):
     df.replace(np.nan, 0, inplace=True)
     #df = df.dropna(subset=['ip.dst'], inplace=True)
     print(df.to_string())
-    df['ip.id'] = df['ip.id'].map(lambda x: int(x, 16))
+    print(type(df['ip.id']))
+    df['ip.id'] = df['ip.id'].map(lambda x: int(str(x), 16))
 
     X = df.drop(['ip.src', 'ip.dst'], axis=1)
     svm = load('svm_model.joblib')
@@ -37,14 +38,14 @@ def calc(filename):
 
 def learn(filename):
     svm = SVC(kernel='linear')
-    knn = KNeighborsClassifier(n_neighbors=4)
+    knn = KNeighborsClassifier(n_neighbors=3)
     boost = HistGradientBoostingClassifier()
     df = pd.read_excel(filename)
-    df['ip.id'] = df['ip.id'].map(lambda x: int(x, 16))
+    df['ip.id'] = df['ip.id'].map(lambda x: int(str(x), 16))
     X = df.drop(['ip.src', 'ip.dst','counter'], axis=1)
     y = df['counter']
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=float(variable.svm_count))
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=float(variable.svm_count), random_state=42)
     svm.fit(X_train, y_train)
     dump(svm,'svm_model.joblib')
     y_pred = svm.predict(X_test)
@@ -60,7 +61,7 @@ def learn(filename):
     r2_score_1 = r2_score(check_test["y_pred"], check_test["y_test"])
     print("R2 Score: " + str(r2_score_1))
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=float(variable.knn_count))
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=float(variable.knn_count), random_state=42)
     knn.fit(X_train, y_train)
     dump(knn,'knn_model.joblib')
     y_pred = knn.predict(X_test)
@@ -75,7 +76,7 @@ def learn(filename):
     print("R2 Score: " + str(r2_score_2))
     print(check_test.head(10))
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=float(variable.boost_count))
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=float(variable.boost_count), random_state=42)
     boost.fit(X_train, y_train)
     dump(boost,'boost_model.joblib')
     y_pred = boost.predict(X_test)
