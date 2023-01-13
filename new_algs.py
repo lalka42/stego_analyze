@@ -16,8 +16,11 @@ def calc(filename):
     df = pd.read_csv(filename)
     outputs = df
     df['ip.dst'].replace('', np.nan, inplace=True)
+    df.replace(np.nan, 0, inplace=True)
     #df = df.dropna(subset=['ip.dst'], inplace=True)
+    print(df.to_string())
     df['ip.id'] = df['ip.id'].map(lambda x: int(x, 16))
+
     X = df.drop(['ip.src', 'ip.dst'], axis=1)
     svm = load('svm_model.joblib')
     knn = load('knn_model.joblib')
