@@ -4,7 +4,7 @@ import os
 import subprocess
 from variable import variable
 
-def dataset():
+def dataset_prepare():
  pathofdump = variable.prepare_set_path
  tablepath = 'prepareset.csv'
  outpath = variable.prepare_set_save_path + '/dataset.xlsx'

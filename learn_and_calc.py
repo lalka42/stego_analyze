@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-from sklearn.metrics import recall_score
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
@@ -9,7 +8,8 @@ from joblib import dump, load
 import matplotlib.pyplot as plt
 from variable import variable
 from time import localtime, strftime
-from sklearn.metrics import r2_score
+from sklearn.metrics import f1_score, accuracy_score, confusion_matrix, classification_report
+
 
 def calc(filename):
 
@@ -56,10 +56,7 @@ def learn(filename):
             "y_pred": y_pred.flatten(),
         })
 
-    print(check_test.head(10))
-    check_test["error"] = check_test["y_pred"] - check_test["y_test"]
-    r2_score_1 = r2_score(check_test["y_pred"], check_test["y_test"])
-    print("R2 Score: " + str(r2_score_1))
+    report1 = classification_report(check_test["y_pred"], check_test["y_test"])
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=float(variable.knn_count), random_state=42)
     knn.fit(X_train, y_train)
@@ -72,9 +69,7 @@ def learn(filename):
             "y_pred": y_pred.flatten(),
         })
 
-    r2_score_2 = r2_score(check_test["y_pred"], check_test["y_test"])
-    print("R2 Score: " + str(r2_score_2))
-    print(check_test.head(10))
+    report2 = classification_report(check_test["y_pred"], check_test["y_test"])
 
     X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=float(variable.boost_count), random_state=42)
     boost.fit(X_train, y_train)
@@ -87,9 +82,8 @@ def learn(filename):
             "y_pred": y_pred.flatten(),
         })
 
-    r2_score_3 = r2_score(check_test["y_pred"], check_test["y_test"])
-    print("R2 Score: " + str(r2_score_3))
-    print(check_test.head(10))
+    report3 = classification_report(check_test["y_pred"], check_test["y_test"])
+    variable.change_metrics(report1, report2, report3)
 
 def plot(df):
     sum_prob_svm = df['svm_probability'].sum()

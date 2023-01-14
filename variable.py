@@ -14,6 +14,9 @@ class Variable():
         self.boost_count = float
         self.prepare_set_path = kwargs.get('path')
         self.prepare_set_save_path = kwargs.get('path')
+        self.report1 = ''
+        self.report2 = ''
+        self.report3 = ''
 
     def change_path(self, path):
         self.path = path
@@ -49,5 +52,10 @@ class Variable():
 
     def change_save_prepare_path(self, path):
         self.prepare_set_save_path = path
+
+    def change_metrics(self, report1, report2, report3):
+        self.report1 = report1
+        self.report2 = report2
+        self.report3 = report3
 
 variable = Variable()

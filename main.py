@@ -1,16 +1,16 @@
 import tkinter
 from tkinter import *
-from tkinter.ttk import Checkbutton
+from tkinter import Checkbutton
 import tkinter.filedialog as fd
 from variable import variable
-from new_algs import calc,learn
+from learn_and_calc import calc,learn
 import os
-import time
 import subprocess
 from tkinter import messagebox
-from dataset_prepare import dataset
-
-
+from dataset_prepare import dataset_prepare
+from memory_profiler import memory_usage
+import time
+import psutil
 
 dumpe_file = os.getcwd() + '\\dump.csv'
 #Функция завершения работы программы
@@ -26,31 +26,36 @@ def dumped():
     filename = fd.askopenfilename(filetypes=(("pcapng", "*.pcapng"), ("all files", "*.*")))
     variable.change_path(filename)
     file_name = os.path.basename("r'" + variable.path)
-    Label(window, text=file_name, bg='#7FFFD4', font=('arial', 10, 'normal')).place(x=30, y=180)
+    c.create_text(115, 190, text=file_name, font=('arial', 10, 'normal'))
 
 def dataset():
     filename = fd.askopenfilename(filetypes=(("xlsx", "*.xlsx"), ("all files", "*.*")))
     variable.change_dataset_path(filename)
     file_name = os.path.basename("r'" + variable.dataset_path)
-    Label(window, text=file_name, bg='#7FFFD4', font=('arial', 10, 'normal')).place(x=650, y=180)
+    c.create_text(675, 190, text=file_name, font=('arial', 10, 'normal'))
 
 def dataset_dumped():
     filename = fd.askopenfilename(filetypes=(("pcapng", "*.pcapng"), ("all files", "*.*")))
     variable.change_prepare_set_path(filename)
     file_name = os.path.basename("r'" + variable.prepare_set_path)
-    Label(window, text=file_name, bg='#7FFFD4', font=('arial', 10, 'normal')).place(x=300, y=230)
+    c.create_text(425, 270, text=file_name, font=('arial', 10, 'normal'))
 
 def saved():
     save_dir_path = fd.askdirectory()
     variable.change_save_path(save_dir_path)
     res_save_path = variable.path_of_save
-    Label(window, text=res_save_path, bg='#7FFFD4', font=('arial', 10, 'normal')).place(x=30, y=310)
+    c.create_text(115, 325, text=res_save_path, font=('arial', 10, 'normal'))
 
 def dataset_saved():
-    save_dir_path = fd.askdirectory()
-    variable.change_prepare_set_path(save_dir_path)
+    save = fd.askdirectory()
+    variable.change_save_prepare_path(save)
     res_save_path = variable.prepare_set_save_path
-    Label(window, text=res_save_path, bg='#7FFFD4', font=('arial', 10, 'normal')).place(x=300, y=320)
+    c.create_text(425, 330, text=res_save_path, font=('arial', 10, 'normal'))
+
+def return_mode_state():
+    rb1['state'] = tkinter.NORMAL
+    rb2['state'] = tkinter.NORMAL
+    rb3['state'] = tkinter.NORMAL
 
 #Кнопка ПУСК
 def analyze():
@@ -71,23 +76,18 @@ def analyze():
         variable.change_mean_diag(Check_diag.get())
         if variable.path == None:
             messagebox.showerror("Ошибка", "Не выбран дамп для анализа")
-            rb1['state'] = tkinter.NORMAL
-            rb2['state'] = tkinter.NORMAL
-            rb3['state'] = tkinter.NORMAL
+            return_mode_state()
             return None
         elif variable.path_of_save == None:
             messagebox.showerror("Ошибка", "Не выбрана директория для сохранения результатов")
-            rb1['state'] = tkinter.NORMAL
-            rb2['state'] = tkinter.NORMAL
-            rb3['state'] = tkinter.NORMAL
+            return_mode_state()
             return None
         elif (os.path.isfile('svm_model.joblib') or os.path.isfile('knn_model.joblib') or os.path.isfile('boost_model.joblib')) != True:
             messagebox.showerror("Ошибка", "Одна из моделей не обучена")
-            rb1['state'] = tkinter.NORMAL
-            rb2['state'] = tkinter.NORMAL
-            rb3['state'] = tkinter.NORMAL
+            return_mode_state()
             return None
         else:
+            time_start = time.perf_counter()
             wd = os.getcwd()
             wd = '"' + wd + '\\Wireshark' + '\\tshark.exe' + '"'
             #wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e tcp.srcport -e tcp.dstport -e tcp.ack -e tcp.urgent_pointer -e tcp.window_size_value -e ip.src -e ip.dst >" + '"' + dumpe_file + '"'
@@ -95,44 +95,60 @@ def analyze():
             wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e udp.srcport -e udp.dstport -e tcp.srcport -e tcp.dstport -e tcp.ack -e tcp.urgent_pointer -e tcp.window_size_value -e ip.len -e ip.id -e ip.tos -e ip.src -e ip.dst > "  + '"' + dumpe_file + '"'
             #wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e ip.len -e ip.id -e ip.tos -e ip.src -e ip.dst >" + '"' + dumpe_file + '"'
             subprocess.call(wd, shell=True)
+            cpu = psutil.cpu_percent(interval=1)
             calc(dumpe_file)
-            rb1['state'] = tkinter.NORMAL
-            rb2['state'] = tkinter.NORMAL
-            rb3['state'] = tkinter.NORMAL
+            return_mode_state()
+            time_elapsed = (time.perf_counter() - time_start)
+            messagebox.showinfo("Результаты анализа", "Анализ завершён. Затраченное время: " + str(time_elapsed) + '\n' + "Максимум памяти: " + str(mem_usage) + "Использование CPU: " + str(cpu))
     elif var.get() == 2:
         if variable.dataset_path == None:
             messagebox.showerror("Ошибка", "Не выбран датасет для обучения")
-            rb1['state'] = tkinter.NORMAL
-            rb2['state'] = tkinter.NORMAL
-            rb3['state'] = tkinter.NORMAL
+            return_mode_state()
             return None
         else:
+            time_start = time.perf_counter()
             variable.change_svm_count(spin_svm.get())
             variable.change_knn_count(spin_knn.get())
             variable.change_boost_count(spin_boost.get())
             learn(variable.dataset_path)
-            rb1['state'] = tkinter.NORMAL
-            rb2['state'] = tkinter.NORMAL
-            rb3['state'] = tkinter.NORMAL
+            cpu = psutil.cpu_percent(interval=1)
+
+            time_elapsed = (time.perf_counter() - time_start)
+            msg1 = 'SVC Score: ' + '\n' + str(variable.report1) + '\n' + '\n'
+            msg2 = 'k-NN Score: ' + '\n' + str(variable.report2) + '\n' + '\n'
+            msg3 = 'Boost Score: ' + '\n' + str(variable.report3) + '\n' + '\n'
+            msg4 = 'Затраченное время: ' + str(time_elapsed) + '\n' + '\n'
+            msg5 = 'Максимум памяти: ' + str(mem_usage) + '\n' + '\n'
+            msg6 = "Использование CPU: " + str(cpu)
+            msg = msg1 + msg2 + msg3 + msg4 + msg5 + msg6
+            messagebox.showinfo("Результаты обучения", msg)
+            return_mode_state()
     elif var.get() == 3:
-        if variable.prepare_set_path == None:
-            messagebox.showerror("Ошибка", "Не выбран дамп для подготовки датасета")
-            rb1['state'] = tkinter.NORMAL
-            rb2['state'] = tkinter.NORMAL
-            rb3['state'] = tkinter.NORMAL
+        if variable.prepare_set_path == None or variable.prepare_set_save_path == None:
+            messagebox.showerror("Ошибка", "Не выбран дамп для подготовки датасета или директория для сохранения")
+            return_mode_state()
             return None
         else:
-           dataset()
-        return None
+           time_start = time.perf_counter()
+           dataset_prepare()
+           cpu = psutil.cpu_percent(interval=1)
+           return_mode_state()
+           time_elapsed = (time.perf_counter() - time_start)
+           messagebox.showinfo("Результаты обучения", "Формирование датасета завершено. Затраченное время: " + str(time_elapsed) + '\n' + "Максимум памяти: " + str(mem_usage) +  + "Использование CPU: " + str(cpu))
+           return None
 
-
+mem_usage = memory_usage()
 
 
 #Отрисовка окна
 window = Tk()
 window.title("Стегоанализ")
-#progress_bar = tkinter.Progressbar(orient='horizontal', mode, maximum, value)
 
+#progress_bar = tkinter.Progressbar(orient='horizontal', mode, maximum, value)
+bg = PhotoImage(file = "home_background.png")
+c = Canvas(window, width=850, height=530)
+c.pack(fill="both", expand=True)
+c.create_image(0, 0, image=bg, anchor="nw")
 
 def pr_mode():
     program_mode = var.get()
@@ -177,67 +193,65 @@ def pr_mode():
 
 
 #UI секции анализа
-dump_choice_button = Button(window, text="Выбрать дамп", bg = "#ffa500", font=('Arial Bold', 14), fg = 'white', command=dumped, state=DISABLED)
+dump_choice_button = Button(window, text="Выбрать дамп", bg="#415374", font=('Arial Bold', 14), fg = 'white', command=dumped, state=DISABLED)
 dump_choice_button.place(x=116,y=230, anchor=CENTER)
-
-dir_choice_button = Button(window, text="Выбрать директорию", bg = "#ffa500", font=('Arial Bold', 12), fg = 'white', command=saved,state=DISABLED)
+#ffa500
+dir_choice_button = Button(window, text="Выбрать директорию", bg="#415374", font=('Arial Bold', 12), fg = 'white', command=saved,state=DISABLED)
 dir_choice_button.place(x=116,y=360, anchor=CENTER)
 
-where_save = Label(window, text='(Куда сохранять результаты)', bg='#7FFFD4', font=('arial', 10, 'normal'))
-where_save.place(x=27, y=380)
+where_save = c.create_text(116, 390, text='(Куда сохранять результаты)', font=('arial', 10, 'normal'))
+
 
 Check_diag = IntVar()
-need_mean = Checkbutton(window, text='Нужно ли вывести диаграмму?', onvalue=1, offvalue=0, variable=Check_diag, state=DISABLED)
+need_mean = Checkbutton(window, text='Нужно ли вывести диаграмму?', onvalue=1, offvalue=0, bg='#81a4c9', variable=Check_diag, state=DISABLED)
 need_mean.place(x=40,y=260)
 variable.change_mean_diag(Check_diag)
 
 Check_savediag = IntVar()
-need_saved = Checkbutton(window, text='Нужно ли сохранить диаграмму?', onvalue=1, offvalue=0, variable=Check_savediag, state=DISABLED)
+need_saved = Checkbutton(window, text='Нужно ли сохранить диаграмму?', onvalue=1, offvalue=0, bg='#81a4c9', variable=Check_savediag, state=DISABLED)
 need_saved.place(x=40, y=280)
 variable.change_save_diag(Check_savediag)
 
 #UI секции подготовки датасета
-dataset_dump_choice_button = Button(window, text="Выбрать дамп", bg = "#ffa500", font=('Arial Bold', 14), fg = 'white', command=dataset_dumped, state=DISABLED)
+dataset_dump_choice_button = Button(window, text="Выбрать дамп", bg="#415374", font=('Arial Bold', 14), fg = 'white', command=dataset_dumped, state=DISABLED)
 dataset_dump_choice_button.place(x=425,y=230, anchor=CENTER)
 
-dataset_dir_choice_button = Button(window, text="Выбрать директорию", bg = "#ffa500", font=('Arial Bold', 12), fg = 'white', command=dataset_saved, tate=DISABLED)
+dataset_dir_choice_button = Button(window, text="Выбрать директорию", bg="#415374", font=('Arial Bold', 12), fg = 'white', command=dataset_saved, state=DISABLED)
 dataset_dir_choice_button.place(x=425,y=360, anchor=CENTER)
 
-where_save_dataset = Label(window, text='(Куда сохранять датасет)', bg='#7FFFD4', font=('arial', 10, 'normal'))
-where_save_dataset.place(x=350, y=380)
+c.create_text(425, 390, text='(Куда сохранять датасет)', font=('arial', 10, 'normal'))
 
 #UI секции обучения
-dataset_choice_button = Button(window, text="Выбрать датасет", bg="#ffa500", font=('Arial Bold', 14), fg='white', command=dataset,state=DISABLED)
+dataset_choice_button = Button(window, text="Выбрать датасет", bg="#415374", font=('Arial Bold', 14), fg='white', command=dataset,state=DISABLED)
 dataset_choice_button.place(x=675, y=230, anchor=CENTER)
 
-Label(window, text='Размер обучающей выборки для svm', bg='#7FFFD4', font=('arial', 9, 'normal')).place(x=570, y=287)
-spin_svm = Spinbox(window, increment=0.1, state=DISABLED, from_= 0.25, to_= 0.9, font=('arial', 12, 'normal'), bg='#F0F8FF', width=10)
+c.create_text(675, 297, text='Размер обучающей выборки для svm', font=('arial', 9, 'normal'))
+spin_svm = Spinbox(window, increment=0.1, state=DISABLED, from_= 0.25, to_= 0.9, font=('arial', 12, 'normal'), bg='#81a4c9', width=10)
 spin_svm.place(x=625, y=310)
-Label(window, text='Размер обучающей выборки для k-NN', bg='#7FFFD4', font=('arial', 9, 'normal')).place(x=570, y=337)
-spin_knn = Spinbox(window, increment=0.1, state=DISABLED, from_= 0.25, to_= 0.9, font=('arial', 12, 'normal'), bg='#F0F8FF', width=10)
+c.create_text(675, 347, text='Размер обучающей выборки для k-NN', font=('arial', 9, 'normal'))
+spin_knn = Spinbox(window, increment=0.1, state=DISABLED, from_= 0.25, to_= 0.9, font=('arial', 12, 'normal'), bg='#81a4c9', width=10)
 spin_knn.place(x=625, y=360)
-Label(window, text='Размер обучающей выборки для boost', bg='#7FFFD4', font=('arial', 9, 'normal')).place(x=570, y=387)
-spin_boost = Spinbox(window, increment=0.1, state=DISABLED, from_= 0.25, to_= 0.9, font=('arial', 12, 'normal'), bg='#F0F8FF', width=10)
+c.create_text(675, 397, text='Размер обучающей выборки для boost', font=('arial', 9, 'normal'))
+spin_boost = Spinbox(window, increment=0.1, state=DISABLED, from_= 0.25, to_= 0.9, font=('arial', 12, 'normal'), bg='#81a4c9', width=10)
 spin_boost.place(x=625, y=410)
 
 #Кнопки выбора режима работы программы
 var = IntVar()
-rb1 = Radiobutton(window, text="Анализ", variable=var, value=1, command=pr_mode)
+rb1 = Radiobutton(window, text="Анализ", variable=var, value=1, command=pr_mode, bg='#acc1da')
 rb1.place(x=273, y=100)
-rb2 = Radiobutton(window, text="Обучение", variable=var, value=2, command=pr_mode)
+rb2 = Radiobutton(window, text="Обучение", variable=var, value=2, command=pr_mode, bg='#b5c8df')
 rb2.place(x=500, y=100)
-rb3 = Radiobutton(window, text="Подготовка датасета", variable=var, value=3, command=pr_mode)
+rb3 = Radiobutton(window, text="Подготовка датасета", variable=var, value=3, command=pr_mode, bg='#b9cbe0')
 rb3.place(x=350, y=100)
 
 #Основоной UI
-Button(window, text="ПУСК", bg = "#ffa500", font=('GOST', 16),fg = 'white', command = analyze).place(x=425,y=450, anchor=CENTER)
+Button(window, text="ПУСК", bg="#1a6dc8", font=('GOST', 16),fg = 'white', command = analyze).place(x=425,y=450, anchor=CENTER)
 Button(window, text="Закрыть программу", command=quit).place(x=425,y=500, anchor=CENTER)
-
-Label(window, text='Пожалуйста, выберите режим работы программы', bg='#7FFFD4', font=('arial', 12, 'normal')).place(x=270, y=65)
-Label(window, text='Обучение', bg='#7FFFD4', font=('arial', 16, 'normal')).place(x=621, y=145)
-Label(window, text='Анализ', bg='#7FFFD4', font=('arial', 16, 'normal')).place(x=82, y=145)
-Label(window, text='Подготовка датасета', bg='#7FFFD4', font=('arial', 16, 'normal')).place(x=320, y=145)
+c.create_text(425, 85, text='Пожалуйста, выберите режим работы программы', font=('arial', 12, 'normal'))
+c.create_text(670, 155, text='Обучение', font=('arial', 16, 'normal'))
+c.create_text(120, 155, text='Анализ', font=('arial', 16, 'normal'))
+c.create_text(425, 155, text='Подготовка датасета', font=('arial', 16, 'normal'))
 window.geometry('850x530')
-window.configure(background='#7FFFD4')
-window.mainloop()
 
+where_save = c.create_text(116, 390, text='(Куда сохранять результаты)', font=('arial', 10, 'normal'))
+window.mainloop()
