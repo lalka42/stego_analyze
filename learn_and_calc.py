@@ -16,6 +16,7 @@ def calc(filename):
     df = pd.read_csv(filename)
     outputs = df
     df['ip.dst'].replace('', np.nan, inplace=True)
+    df.dropna(subset=['ip.dst'], inplace=True)
     df.replace(np.nan, 0, inplace=True)
     #df = df.dropna(subset=['ip.dst'], inplace=True)
     print(df.to_string())

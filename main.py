@@ -99,7 +99,7 @@ def analyze():
             calc(dumpe_file)
             return_mode_state()
             time_elapsed = (time.perf_counter() - time_start)
-            messagebox.showinfo("Результаты анализа", "Анализ завершён. Затраченное время: " + str(time_elapsed) + '\n' + "Максимум памяти: " + str(mem_usage) + "Использование CPU: " + str(cpu))
+            messagebox.showinfo("Результаты анализа", "Анализ завершён. Затраченное время: " + str(time_elapsed) + '\n' + "Максимум памяти: " + str(mem_usage) + '\n' + "Использование CPU: " + str(cpu))
     elif var.get() == 2:
         if variable.dataset_path == None:
             messagebox.showerror("Ошибка", "Не выбран датасет для обучения")
@@ -134,7 +134,7 @@ def analyze():
            cpu = psutil.cpu_percent(interval=1)
            return_mode_state()
            time_elapsed = (time.perf_counter() - time_start)
-           messagebox.showinfo("Результаты обучения", "Формирование датасета завершено. Затраченное время: " + str(time_elapsed) + '\n' + "Максимум памяти: " + str(mem_usage) + "Использование CPU: " + str(cpu))
+           messagebox.showinfo("Результаты обучения", "Формирование датасета завершено. Затраченное время: " + str(time_elapsed) + '\n' + "Максимум памяти: " + str(mem_usage) + '\n' + "Использование CPU: " + str(cpu))
            return None
 
 mem_usage = memory_usage()
