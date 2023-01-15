@@ -24,6 +24,7 @@ while len(arr) > 0:
  l = int(arr.pop(0))
  dscp = 32*h + 16*i + 8*j + 4*k + 2*l
  ecn = 128*f + 64*g
+ tos = 128*f + 64*g + 32*h + 16*i + 8*j + 4*k + 2*l
  #Ident
  n = int(arr.pop(0))
  o = int(arr.pop(0))
@@ -64,15 +65,15 @@ while len(arr) > 0:
  udptwo = random.randint(1,1024)
  tcpone = random.randint(1,1024)
  tcptwo = random.randint(1,1024)
- pktcp = IP(src="192.168.88.248", dst="192.168.88.246", len=length, dscp=dscp, ecn=ecn, id=ident) / TCP(sport=tcpone,dport=tcptwo, ack=ack, urgptr=urg,window=wind,flags="AU")
+ pktcp = IP(src="192.168.88.248", dst="192.168.88.247", len=length, tos=tos, id=ident) / TCP(sport=tcpone,dport=tcptwo, ack=ack, urgptr=urg,window=wind,flags="AU")
 
- pkudp = IP(src="192.168.88.248", dst="192.168.88.246") /UDP(sport=udpone, dport=udptwo, len=8)
+ pkudp = IP(src="192.168.88.248", dst="192.168.88.247") /UDP(sport=udpone, dport=udptwo, len=8)
  #packets = sniff(filter="host 10.98.14.135", prn=lambda x: x.show())
  #packets.show()
  time.sleep(random.uniform(0.05,0.10))
  send(pktcp)
  cnt=cnt+2
- #time.sleep(random.uniform(0.10,0.20))
+ time.sleep(random.uniform(0.10,0.20))
  #cnt=cnt+1
- #send(pkudp)
+ send(pkudp)
  print(cnt)

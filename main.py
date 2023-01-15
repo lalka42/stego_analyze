@@ -134,7 +134,7 @@ def analyze():
            cpu = psutil.cpu_percent(interval=1)
            return_mode_state()
            time_elapsed = (time.perf_counter() - time_start)
-           messagebox.showinfo("Результаты обучения", "Формирование датасета завершено. Затраченное время: " + str(time_elapsed) + '\n' + "Максимум памяти: " + str(mem_usage) +  + "Использование CPU: " + str(cpu))
+           messagebox.showinfo("Результаты обучения", "Формирование датасета завершено. Затраченное время: " + str(time_elapsed) + '\n' + "Максимум памяти: " + str(mem_usage) + "Использование CPU: " + str(cpu))
            return None
 
 mem_usage = memory_usage()
