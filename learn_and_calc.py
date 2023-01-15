@@ -19,8 +19,6 @@ def calc(filename):
     df.dropna(subset=['ip.dst'], inplace=True)
     df.replace(np.nan, 0, inplace=True)
     #df = df.dropna(subset=['ip.dst'], inplace=True)
-    print(df.to_string())
-    print(type(df['ip.id']))
     df['ip.id'] = df['ip.id'].map(lambda x: int(str(x), 16))
 
     X = df.drop(['ip.src', 'ip.dst'], axis=1)
