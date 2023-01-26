@@ -8,8 +8,8 @@ from joblib import dump, load
 import matplotlib.pyplot as plt
 from variable import variable
 from time import localtime, strftime
-from sklearn.metrics import f1_score, accuracy_score, confusion_matrix, classification_report
-
+from sklearn.metrics import classification_report
+from memory_profiler import profile
 
 def calc(filename):
 
@@ -40,11 +40,12 @@ def learn(filename):
     knn = KNeighborsClassifier(n_neighbors=3)
     boost = HistGradientBoostingClassifier()
     df = pd.read_excel(filename)
+    #del df[df.columns[0]]
     check_dump = 'counter' in df.columns
     print(check_dump)
     if check_dump == False:
         variable.change_check_learn(False)
-        return 0
+        return None
     else:
         df['ip.id'] = df['ip.id'].map(lambda x: int(str(x), 16))
         X = df.drop(['ip.src', 'ip.dst', 'counter'], axis=1)
@@ -90,7 +91,6 @@ def learn(filename):
 
         report3 = classification_report(check_test["y_pred"], check_test["y_test"])
         variable.change_metrics(report1, report2, report3)
-
 
 def plot(df):
     sum_prob_svm = df['svm_probability'].sum()

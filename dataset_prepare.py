@@ -1,19 +1,13 @@
 import pandas as pd
 import numpy as np
 import os
-import subprocess
 from variable import variable
-
+from dump_parser import parser
 def dataset_prepare():
- pathofdump = variable.prepare_set_path
- tablepath = 'prepareset.csv'
  outpath = variable.prepare_set_save_path + '/dataset.xlsx'
- wd = os.getcwd()
- ww = '"' + wd + '\\Wireshark' + '\\' + tablepath + '"'
- wd = '"' + wd + '\\Wireshark' + '\\tshark.exe' + '"'
- fw = wd + ' -r ' + pathofdump + " -T fields -E header=y -E separator=, -E occurrence=f -e udp.srcport -e udp.dstport -e tcp.srcport -e tcp.dstport -e tcp.ack -e tcp.urgent_pointer -e tcp.window_size_value -e ip.len -e ip.id -e ip.tos -e ip.src -e ip.dst > " + ww
- subprocess.call(fw, shell=True)
- df = pd.read_csv("C:/Users/Nikita/PycharmProjects/stego_analyze/Wireshark/prepareset.csv")
+ dump_file = os.getcwd() + '\\prepareset.csv'
+ parser(variable.prepare_set_path, dump_file)
+ df = pd.read_csv(dump_file)
  df['ip.dst'].replace('', np.nan, inplace=True)
  df.dropna(subset=['ip.dst'], inplace=True)
  df.replace(np.nan, 0, inplace=True)

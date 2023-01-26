@@ -5,20 +5,21 @@ import tkinter.filedialog as fd
 from variable import variable
 from learn_and_calc import calc,learn
 import os
-import subprocess
 from tkinter import messagebox
 from dataset_prepare import dataset_prepare
-from memory_profiler import memory_usage
 import time
-import psutil
+from dump_parser import parser
 
-dumpe_file = os.getcwd() + '\\dump.csv'
+dump_file = os.getcwd() + '\\dump.csv'
 #Функция завершения работы программы
 def quit():
     variable.quit = 1
     dump_file = os.getcwd() + '\\dump.csv'
+    prepareset_path = os.getcwd() + '\\prepareset.csv'
     if os.path.exists(dump_file):
         os.remove(dump_file)
+    if os.path.exists(prepareset_path):
+        os.remove(prepareset_path)
     window.destroy()
 
 #Получение пути дампа
@@ -89,17 +90,12 @@ def analyze():
         else:
             time_start = time.perf_counter()
             wd = os.getcwd()
-            wd = '"' + wd + '\\Wireshark' + '\\tshark.exe' + '"'
-            #wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e tcp.srcport -e tcp.dstport -e tcp.ack -e tcp.urgent_pointer -e tcp.window_size_value -e ip.src -e ip.dst >" + '"' + dumpe_file + '"'
-            #wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e udp.srcport -e udp.dstport -e ip.src -e ip.dst >" + '"' + dumpe_file + '"'
-            wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e udp.srcport -e udp.dstport -e tcp.srcport -e tcp.dstport -e tcp.ack -e tcp.urgent_pointer -e tcp.window_size_value -e ip.len -e ip.id -e ip.tos -e ip.src -e ip.dst > "  + '"' + dumpe_file + '"'
-            #wd = wd + ' -r ' + variable.path + " -T fields -E header=y -E separator=, -E occurrence=f -e ip.len -e ip.id -e ip.tos -e ip.src -e ip.dst >" + '"' + dumpe_file + '"'
-            subprocess.call(wd, shell=True)
-            cpu = psutil.cpu_percent(interval=1)
-            calc(dumpe_file)
+            parser(variable.path,dump_file)
+            calc(dump_file)
+            time_elapsed = "{:2.2f}".format(time.perf_counter() - time_start)
+            msg = "Анализ завершён.\n\nЗатраченное время: " + str(time_elapsed) + ' секунд(ы)' + '\n'
+            messagebox.showinfo("Результаты анализа", msg)
             return_mode_state()
-            time_elapsed = (time.perf_counter() - time_start)
-            messagebox.showinfo("Результаты анализа", "Анализ завершён. Затраченное время: " + str(time_elapsed) + '\n' + "Максимум памяти: " + str(mem_usage) + '\n' + "Использование CPU: " + str(cpu))
     elif var.get() == 2:
         if variable.dataset_path == None:
             messagebox.showerror("Ошибка", "Не выбран датасет для обучения")
@@ -112,19 +108,16 @@ def analyze():
             variable.change_boost_count(spin_boost.get())
             learn(variable.dataset_path)
             if variable.check_learn == False:
-                messagebox.showerror("Ошибка", "Датасет неправильно размечен")
-                return 0
                 return_mode_state()
-            cpu = psutil.cpu_percent(interval=1)
+                messagebox.showerror("Ошибка", "Датасет неправильно размечен")
+                return None
 
-            time_elapsed = (time.perf_counter() - time_start)
+            time_elapsed = "{:2.2f}".format(time.perf_counter() - time_start)
             msg1 = 'SVC Score: ' + '\n' + str(variable.report1) + '\n' + '\n'
             msg2 = 'k-NN Score: ' + '\n' + str(variable.report2) + '\n' + '\n'
             msg3 = 'Boost Score: ' + '\n' + str(variable.report3) + '\n' + '\n'
-            msg4 = 'Затраченное время: ' + str(time_elapsed) + '\n' + '\n'
-            msg5 = 'Максимум памяти: ' + str(mem_usage) + '\n' + '\n'
-            msg6 = "Использование CPU: " + str(cpu)
-            msg = msg1 + msg2 + msg3 + msg4 + msg5 + msg6
+            msg4 = 'Затраченное время: ' + str(time_elapsed) + ' секунд(ы)' + '\n' + '\n'
+            msg = msg1 + msg2 + msg3 + msg4
             messagebox.showinfo("Результаты обучения", msg)
             return_mode_state()
     elif var.get() == 3:
@@ -135,13 +128,12 @@ def analyze():
         else:
            time_start = time.perf_counter()
            dataset_prepare()
-           cpu = psutil.cpu_percent(interval=1)
            return_mode_state()
-           time_elapsed = (time.perf_counter() - time_start)
-           messagebox.showinfo("Формирование датасета", "Формирование датасета завершено. Затраченное время: " + str(time_elapsed) + '\n' + "Максимум памяти: " + str(mem_usage) + '\n' + "Использование CPU: " + str(cpu))
+           time_elapsed = "{:2.2f}".format(time.perf_counter() - time_start)
+           msg = "Формирование датасета завершено.\n\nЗатраченное время: " + str(time_elapsed) + ' секунд(ы)' + '\n'
+           messagebox.showinfo("Формирование датасета", msg)
            return None
 
-mem_usage = memory_usage()
 
 
 #Отрисовка окна
