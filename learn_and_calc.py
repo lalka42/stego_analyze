@@ -40,49 +40,57 @@ def learn(filename):
     knn = KNeighborsClassifier(n_neighbors=3)
     boost = HistGradientBoostingClassifier()
     df = pd.read_excel(filename)
-    df['ip.id'] = df['ip.id'].map(lambda x: int(str(x), 16))
-    X = df.drop(['ip.src', 'ip.dst','counter'], axis=1)
-    y = df['counter']
+    check_dump = 'counter' in df.columns
+    print(check_dump)
+    if check_dump == False:
+        variable.change_check_learn(False)
+        return 0
+    else:
+        df['ip.id'] = df['ip.id'].map(lambda x: int(str(x), 16))
+        X = df.drop(['ip.src', 'ip.dst', 'counter'], axis=1)
+        y = df['counter']
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=float(variable.svm_count), random_state=42)
-    svm.fit(X_train, y_train)
-    dump(svm,'svm_model.joblib')
-    y_pred = svm.predict(X_test)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=float(variable.svm_count), random_state=42)
+        svm.fit(X_train, y_train)
+        dump(svm, 'svm_model.joblib')
+        y_pred = svm.predict(X_test)
 
-    check_test = pd.DataFrame(
-        {
-            "y_test": y_test,
-            "y_pred": y_pred.flatten(),
-        })
+        check_test = pd.DataFrame(
+            {
+                "y_test": y_test,
+                "y_pred": y_pred.flatten(),
+            })
 
-    report1 = classification_report(check_test["y_pred"], check_test["y_test"])
+        report1 = classification_report(check_test["y_pred"], check_test["y_test"])
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=float(variable.knn_count), random_state=42)
-    knn.fit(X_train, y_train)
-    dump(knn,'knn_model.joblib')
-    y_pred = knn.predict(X_test)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=float(variable.knn_count), random_state=42)
+        knn.fit(X_train, y_train)
+        dump(knn, 'knn_model.joblib')
+        y_pred = knn.predict(X_test)
 
-    check_test = pd.DataFrame(
-        {
-            "y_test": y_test,
-            "y_pred": y_pred.flatten(),
-        })
+        check_test = pd.DataFrame(
+            {
+                "y_test": y_test,
+                "y_pred": y_pred.flatten(),
+            })
 
-    report2 = classification_report(check_test["y_pred"], check_test["y_test"])
+        report2 = classification_report(check_test["y_pred"], check_test["y_test"])
 
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=float(variable.boost_count), random_state=42)
-    boost.fit(X_train, y_train)
-    dump(boost,'boost_model.joblib')
-    y_pred = boost.predict(X_test)
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=float(variable.boost_count),
+                                                            random_state=42)
+        boost.fit(X_train, y_train)
+        dump(boost, 'boost_model.joblib')
+        y_pred = boost.predict(X_test)
 
-    check_test = pd.DataFrame(
-        {
-            "y_test": y_test,
-            "y_pred": y_pred.flatten(),
-        })
+        check_test = pd.DataFrame(
+            {
+                "y_test": y_test,
+                "y_pred": y_pred.flatten(),
+            })
 
-    report3 = classification_report(check_test["y_pred"], check_test["y_test"])
-    variable.change_metrics(report1, report2, report3)
+        report3 = classification_report(check_test["y_pred"], check_test["y_test"])
+        variable.change_metrics(report1, report2, report3)
+
 
 def plot(df):
     sum_prob_svm = df['svm_probability'].sum()

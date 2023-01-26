@@ -11,7 +11,7 @@ def dataset_prepare():
  wd = os.getcwd()
  ww = '"' + wd + '\\Wireshark' + '\\' + tablepath + '"'
  wd = '"' + wd + '\\Wireshark' + '\\tshark.exe' + '"'
- fw = wd + ' -r ' + pathofdump + " -T fields -E header=y -E separator=, -E occurrence=f -e udp.srcport -e udp.dstport -e tcp.srcport -e tcp.dstport -e tcp.ack -e tcp.urgent_pointer -e tcp.window_size_value -e ip.len -e ip.id -e ip.dsfield.dscp -e ip.src -e ip.dst > " + ww
+ fw = wd + ' -r ' + pathofdump + " -T fields -E header=y -E separator=, -E occurrence=f -e udp.srcport -e udp.dstport -e tcp.srcport -e tcp.dstport -e tcp.ack -e tcp.urgent_pointer -e tcp.window_size_value -e ip.len -e ip.id -e ip.tos -e ip.src -e ip.dst > " + ww
  subprocess.call(fw, shell=True)
  df = pd.read_csv("C:/Users/Nikita/PycharmProjects/stego_analyze/Wireshark/prepareset.csv")
  df['ip.dst'].replace('', np.nan, inplace=True)

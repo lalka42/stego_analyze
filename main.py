@@ -111,6 +111,10 @@ def analyze():
             variable.change_knn_count(spin_knn.get())
             variable.change_boost_count(spin_boost.get())
             learn(variable.dataset_path)
+            if variable.check_learn == False:
+                messagebox.showerror("Ошибка", "Датасет неправильно размечен")
+                return 0
+                return_mode_state()
             cpu = psutil.cpu_percent(interval=1)
 
             time_elapsed = (time.perf_counter() - time_start)
@@ -134,7 +138,7 @@ def analyze():
            cpu = psutil.cpu_percent(interval=1)
            return_mode_state()
            time_elapsed = (time.perf_counter() - time_start)
-           messagebox.showinfo("Результаты обучения", "Формирование датасета завершено. Затраченное время: " + str(time_elapsed) + '\n' + "Максимум памяти: " + str(mem_usage) + '\n' + "Использование CPU: " + str(cpu))
+           messagebox.showinfo("Формирование датасета", "Формирование датасета завершено. Затраченное время: " + str(time_elapsed) + '\n' + "Максимум памяти: " + str(mem_usage) + '\n' + "Использование CPU: " + str(cpu))
            return None
 
 mem_usage = memory_usage()

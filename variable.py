@@ -17,6 +17,7 @@ class Variable():
         self.report1 = ''
         self.report2 = ''
         self.report3 = ''
+        self.check_learn = True
 
     def change_path(self, path):
         self.path = path
@@ -57,5 +58,8 @@ class Variable():
         self.report1 = report1
         self.report2 = report2
         self.report3 = report3
+
+    def change_check_learn(self, var):
+        self.check_learn = var
 
 variable = Variable()
