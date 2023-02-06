@@ -18,6 +18,7 @@ class Variable():
         self.report2 = ''
         self.report3 = ''
         self.check_learn = True
+        self.stop_rts = False
 
     def change_path(self, path):
         self.path = path
@@ -27,6 +28,8 @@ class Variable():
     def change_dataset_path(self, path):
         self.dataset_path = path
 
+    def rts_analyze_stop(self):
+        self.stop_rts = True
     def change_save_path(self, path):
         self.path_of_save = path
 

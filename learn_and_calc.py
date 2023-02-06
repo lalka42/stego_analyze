@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from variable import variable
 from time import localtime, strftime
 from sklearn.metrics import classification_report
-from memory_profiler import profile
+
 
 def calc(filename):
 
@@ -31,9 +31,13 @@ def calc(filename):
     outputs['knn_probability'] = y_pred_svm.tolist()
     y_pred_boost = boost.predict(X)
     outputs['boost_probability'] = y_pred_svm.tolist()
-    save_res(outputs)
-    if variable.mean_diag != 0 or variable.save_diag != 0:
-     plot(outputs)
+    print(outputs)
+    #save_res(outputs)
+    #if variable.mean_diag != 0 or variable.save_diag != 0:
+     #plot(outputs)
+
+def rt_calc(filename):
+    start_df = pd.read_csv(filename)
 
 def learn(filename):
     svm = SVC(kernel='linear')

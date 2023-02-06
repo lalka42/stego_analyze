@@ -1,10 +1,15 @@
 import csv
 from scapy.all import *
 
-def parser(path,dump):
-    pcap = rdpcap(path)
+def parser(path,dump,mode):
+    parse_mode = mode
+    print(parse_mode)
     headers = ['udp.srcport', 'udp.dstport', 'tcp.srcport', 'tcp.dstport', 'tcp.ack', 'tcp.urgent_pointer',
                'tcp.window_size_value', 'ip.len', 'ip.id', 'ip.tos', 'ip.src', 'ip.dst']
+    #if parse_mode == 1:
+     #   pcap = rdpcap(path)
+    #else:
+    pcap = sniff(count=1)
     with open(dump, 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(headers)
@@ -40,4 +45,5 @@ def parser(path,dump):
                 i4 = 0
                 i5 = 0
             rows = [u1, u2, t1, t2, t3, t4, t5, i1, i2, i3, i4, i5]
+            print(rows)
             writer.writerow(rows)

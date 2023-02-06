@@ -3,7 +3,7 @@ from tkinter import *
 from tkinter import Checkbutton
 import tkinter.filedialog as fd
 from variable import variable
-from learn_and_calc import calc, learn
+from learn_and_calc import calc, learn, rt_calc
 import os
 from tkinter import messagebox
 from dataset_prepare import dataset_prepare
@@ -11,7 +11,7 @@ import time
 from dump_parser import parser
 
 dump_file = os.getcwd() + '\\dump.csv'
-
+stop_rts = False
 
 # Функция завершения работы программы
 def quit_program():
@@ -66,7 +66,6 @@ def return_mode_state():
     rb2['state'] = tkinter.NORMAL
     rb3['state'] = tkinter.NORMAL
 
-
 # Кнопка ПУСК
 def analyze():
     dump_choice_button['state'] = tkinter.DISABLED
@@ -97,8 +96,9 @@ def analyze():
             return_mode_state()
             return None
         else:
+            mode = 1
             time_start = time.perf_counter()
-            parser(variable.path, dump_file)
+            parser(variable.path, dump_file, mode)
             calc(dump_file)
             time_elapsed = "{:2.2f}".format(time.perf_counter() - time_start)
             msg = "Анализ завершён.\n\nЗатраченное время: " + str(time_elapsed) + ' секунд(ы)' + '\n'
@@ -141,6 +141,17 @@ def analyze():
             msg = "Формирование датасета завершено.\n\nЗатраченное время: " + str(time_elapsed) + ' секунд(ы)' + '\n'
             messagebox.showinfo("Формирование датасета", msg)
             return None
+
+def rts_analyze_func():
+    mode = 2
+    path = ''
+    #while not variable.stop_rts:
+    parser(mode, dump_file, path)
+    #time.sleep(5)
+        #calc(dump_file)
+    return None
+
+
 
 
 # Отрисовка окна
@@ -194,6 +205,23 @@ def pr_mode():
         spin_boost['state'] = tkinter.DISABLED
         dataset_dump_choice_button['state'] = tkinter.NORMAL
         dataset_dir_choice_button['state'] = tkinter.NORMAL
+        window.update()
+
+    elif program_mode == 4:
+        dump_choice_button['state'] = tkinter.DISABLED
+        dir_choice_button['state'] = tkinter.DISABLED
+        dataset_choice_button['state'] = tkinter.DISABLED
+        need_saved['state'] = tkinter.DISABLED
+        need_mean['state'] = tkinter.DISABLED
+        spin_knn['state'] = tkinter.DISABLED
+        spin_svm['state'] = tkinter.DISABLED
+        spin_boost['state'] = tkinter.DISABLED
+        dataset_dump_choice_button['state'] = tkinter.DISABLED
+        dataset_dir_choice_button['state'] = tkinter.DISABLED
+        pusk['state'] = tkinter.DISABLED
+        rts_analyze['state'] = tkinter.NORMAL
+        rts_stop['state'] = tkinter.NORMAL
+        window.update()
 
 
 # UI секции анализа
@@ -256,10 +284,16 @@ rb2 = Radiobutton(window, text="Обучение", variable=var, value=2, comman
 rb2.place(x=500, y=100)
 rb3 = Radiobutton(window, text="Подготовка датасета", variable=var, value=3, command=pr_mode, bg='#b9cbe0')
 rb3.place(x=350, y=100)
+rb4 = Radiobutton(window, text="RTS Analyze", variable=var, value=4, command=pr_mode, bg='#b9cbe0')
+rb4.place(x=600, y=100)
 
 # Основной UI
-Button(window, text="ПУСК", bg="#1a6dc8", font=('arial', 16), fg='white', command=analyze).place(x=425, y=450,
-                                                                                                 anchor=CENTER)
+pusk = Button(window, text="ПУСК", bg="#1a6dc8", font=('arial', 16), fg='white', command=analyze)
+pusk.place(x=425, y=450,anchor=CENTER)
+rts_analyze = Button(window, text="Анализ в реальном времени", bg="#1a6dc8", font=('arial', 16), fg='white', command=rts_analyze_func, state=DISABLED)
+rts_analyze.place(x=645, y=475,anchor=CENTER)
+rts_stop = Button(window, text="Остановить анализ", bg="#1a6dc8", font=('arial', 16), fg='white', command=variable.rts_analyze_stop, state=DISABLED)
+rts_stop.place(x=165, y=475,anchor=CENTER)
 Button(window, text="Закрыть программу", command=quit_program).place(x=425, y=500, anchor=CENTER)
 c.create_text(425, 85, text='Пожалуйста, выберите режим работы программы', font=('arial', 12, 'normal'))
 c.create_text(670, 155, text='Обучение', font=('arial', 16, 'normal'))
