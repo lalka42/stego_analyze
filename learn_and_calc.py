@@ -11,7 +11,7 @@ from time import localtime, strftime
 from sklearn.metrics import classification_report
 
 
-def calc(filename):
+def calc(filename, mode):
 
     df = pd.read_csv(filename)
     outputs = df
@@ -26,15 +26,17 @@ def calc(filename):
     knn = load('knn_model.joblib')
     boost = load('boost_model.joblib')
     y_pred_svm = svm.predict(X)
-    outputs['svm_probability'] = y_pred_svm.tolist()
+    outputs['svm_detect'] = y_pred_svm.tolist()
     y_pred_knn = knn.predict(X)
-    outputs['knn_probability'] = y_pred_svm.tolist()
+    outputs['knn_detect'] = y_pred_svm.tolist()
     y_pred_boost = boost.predict(X)
-    outputs['boost_probability'] = y_pred_svm.tolist()
-    print(outputs)
-    #save_res(outputs)
-    #if variable.mean_diag != 0 or variable.save_diag != 0:
-     #plot(outputs)
+    outputs['boost_detect'] = y_pred_svm.tolist()
+    if mode == 1:
+        save_res(outputs)
+        if variable.mean_diag != 0 or variable.save_diag != 0:
+            plot(outputs)
+    elif mode == 2:
+        print(outputs.to_string())
 
 def rt_calc(filename):
     start_df = pd.read_csv(filename)
@@ -97,9 +99,9 @@ def learn(filename):
         variable.change_metrics(report1, report2, report3)
 
 def plot(df):
-    sum_prob_svm = df['svm_probability'].sum()
-    sum_prob_knn = df['knn_probability'].sum()
-    sum_prob_boost = df['boost_probability'].sum()
+    sum_prob_svm = df['svm_detect'].sum()
+    sum_prob_knn = df['knn_detect'].sum()
+    sum_prob_boost = df['boost_detect'].sum()
     sum_all = df.shape[0]
     labels = ["Всего пакетов", "Обнаружил SVM:", "Обнаружил k-NN:", "Обнаружил Boost:"]
     vals = [sum_all, sum_prob_svm, sum_prob_knn, sum_prob_boost]

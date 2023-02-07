@@ -9,6 +9,7 @@ from tkinter import messagebox
 from dataset_prepare import dataset_prepare
 import time
 from dump_parser import parser
+import threading
 
 dump_file = os.getcwd() + '\\dump.csv'
 stop_rts = False
@@ -65,6 +66,7 @@ def return_mode_state():
     rb1['state'] = tkinter.NORMAL
     rb2['state'] = tkinter.NORMAL
     rb3['state'] = tkinter.NORMAL
+    rb4['state'] = tkinter.NORMAL
 
 # Кнопка ПУСК
 def analyze():
@@ -99,7 +101,7 @@ def analyze():
             mode = 1
             time_start = time.perf_counter()
             parser(variable.path, dump_file, mode)
-            calc(dump_file)
+            calc(dump_file, mode)
             time_elapsed = "{:2.2f}".format(time.perf_counter() - time_start)
             msg = "Анализ завершён.\n\nЗатраченное время: " + str(time_elapsed) + ' секунд(ы)' + '\n'
             messagebox.showinfo("Результаты анализа", msg)
@@ -142,17 +144,18 @@ def analyze():
             messagebox.showinfo("Формирование датасета", msg)
             return None
 
+def start_rts_in_bg():
+    threading.Thread(target=rts_analyze_func).start()
+
 def rts_analyze_func():
     mode = 2
     path = ''
-    #while not variable.stop_rts:
-    parser(mode, dump_file, path)
-    #time.sleep(5)
-        #calc(dump_file)
+    while not variable.stop_rts:
+        parser(mode, dump_file, path)
+        calc(dump_file,mode)
+        time.sleep(0.1)
+
     return None
-
-
-
 
 # Отрисовка окна
 window = Tk()
@@ -169,29 +172,35 @@ def pr_mode():
     program_mode = var.get()
 
     if program_mode == 1:
-        dump_choice_button['state'] = tkinter.NORMAL
-        dir_choice_button['state'] = tkinter.NORMAL
         dataset_choice_button['state'] = tkinter.DISABLED
-        need_saved['state'] = tkinter.NORMAL
-        need_mean['state'] = tkinter.NORMAL
         spin_knn['state'] = tkinter.DISABLED
         spin_svm['state'] = tkinter.DISABLED
         spin_boost['state'] = tkinter.DISABLED
         dataset_dump_choice_button['state'] = tkinter.DISABLED
         dataset_dir_choice_button['state'] = tkinter.DISABLED
+        rts_analyze['state'] = tkinter.DISABLED
+        rts_stop['state'] = tkinter.DISABLED
+        need_saved['state'] = tkinter.NORMAL
+        need_mean['state'] = tkinter.NORMAL
+        pusk['state'] = tkinter.NORMAL
+        dump_choice_button['state'] = tkinter.NORMAL
+        dir_choice_button['state'] = tkinter.NORMAL
         window.update()
 
     elif program_mode == 2:
         dump_choice_button['state'] = tkinter.DISABLED
         dir_choice_button['state'] = tkinter.DISABLED
-        dataset_choice_button['state'] = tkinter.NORMAL
         need_saved['state'] = tkinter.DISABLED
         need_mean['state'] = tkinter.DISABLED
+        dataset_dump_choice_button['state'] = tkinter.DISABLED
+        dataset_dir_choice_button['state'] = tkinter.DISABLED
+        rts_analyze['state'] = tkinter.DISABLED
+        rts_stop['state'] = tkinter.DISABLED
         spin_knn['state'] = tkinter.NORMAL
         spin_svm['state'] = tkinter.NORMAL
         spin_boost['state'] = tkinter.NORMAL
-        dataset_dump_choice_button['state'] = tkinter.DISABLED
-        dataset_dir_choice_button['state'] = tkinter.DISABLED
+        pusk['state'] = tkinter.NORMAL
+        dataset_choice_button['state'] = tkinter.NORMAL
         window.update()
 
     elif program_mode == 3:
@@ -203,8 +212,11 @@ def pr_mode():
         spin_knn['state'] = tkinter.DISABLED
         spin_svm['state'] = tkinter.DISABLED
         spin_boost['state'] = tkinter.DISABLED
+        rts_analyze['state'] = tkinter.DISABLED
+        rts_stop['state'] = tkinter.DISABLED
         dataset_dump_choice_button['state'] = tkinter.NORMAL
         dataset_dir_choice_button['state'] = tkinter.NORMAL
+        pusk['state'] = tkinter.NORMAL
         window.update()
 
     elif program_mode == 4:
@@ -290,7 +302,7 @@ rb4.place(x=600, y=100)
 # Основной UI
 pusk = Button(window, text="ПУСК", bg="#1a6dc8", font=('arial', 16), fg='white', command=analyze)
 pusk.place(x=425, y=450,anchor=CENTER)
-rts_analyze = Button(window, text="Анализ в реальном времени", bg="#1a6dc8", font=('arial', 16), fg='white', command=rts_analyze_func, state=DISABLED)
+rts_analyze = Button(window, text="Анализ в реальном времени", bg="#1a6dc8", font=('arial', 16), fg='white', command=start_rts_in_bg, state=DISABLED)
 rts_analyze.place(x=645, y=475,anchor=CENTER)
 rts_stop = Button(window, text="Остановить анализ", bg="#1a6dc8", font=('arial', 16), fg='white', command=variable.rts_analyze_stop, state=DISABLED)
 rts_stop.place(x=165, y=475,anchor=CENTER)
