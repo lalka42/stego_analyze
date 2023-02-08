@@ -144,6 +144,8 @@ def analyze():
             messagebox.showinfo("Формирование датасета", msg)
             return None
 
+def start_analyze_in_bg():
+    threading.Thread(target=analyze).start()
 def start_rts_in_bg():
     threading.Thread(target=rts_analyze_func).start()
 
@@ -300,7 +302,7 @@ rb4 = Radiobutton(window, text="RTS Analyze", variable=var, value=4, command=pr_
 rb4.place(x=600, y=100)
 
 # Основной UI
-pusk = Button(window, text="ПУСК", bg="#1a6dc8", font=('arial', 16), fg='white', command=analyze)
+pusk = Button(window, text="ПУСК", bg="#1a6dc8", font=('arial', 16), fg='white', command=start_analyze_in_bg)
 pusk.place(x=425, y=450,anchor=CENTER)
 rts_analyze = Button(window, text="Анализ в реальном времени", bg="#1a6dc8", font=('arial', 16), fg='white', command=start_rts_in_bg, state=DISABLED)
 rts_analyze.place(x=645, y=475,anchor=CENTER)

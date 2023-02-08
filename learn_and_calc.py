@@ -107,7 +107,7 @@ def plot(df):
     vals = [sum_all, sum_prob_svm, sum_prob_knn, sum_prob_boost]
     fig, ax = plt.subplots()
     explode = None
-    ax.pie(vals, labels=labels, autopct='%1.1f%%', shadow=True, explode=explode)
+    ax.hist(vals, [1, 2, 3, 4])
     plt.title("Вычисление ")
     text_g = 'Всего: ' + str(sum_all) + ' | Обнаружил SVM: ' + str(sum_prob_svm) + ' | Обнаружил k-NN: ' + str(sum_prob_knn) + ' | Обнаружил Boost: ' + str(sum_prob_boost)
     ax.text(-2.2, -1.2, text_g, fontsize=10)
