@@ -325,38 +325,42 @@ class Ui_MainWindow(object):
         self.rb4.setEnabled(True)
 
     def saved(self):
-        filename = QtWidgets.QFileDialog.getExistingDirectory(self, "Select a Directory")
-        if filename:
-            path = Path(filename)
-            print(path)
-        # save_dir_path = str(QFileDialog.getExistingDirectory(self, "Select Directory"))
-        # variable.change_save_path(filename)
-        # res_save_path = variable.path_of_save
-        # c.create_text(115, 325, text=res_save_path, font=('arial', 10, 'normal'))
-
+        save_dir_path = str(QtWidgets.QFileDialog.getExistingDirectory(None, "Select Directory"))
+        if save_dir_path:
+            path =Path(save_dir_path)
+            self.dir_choice_line.setText(str(path))
+        variable.change_save_path(save_dir_path)
+        res_save_path = variable.path_of_save
 
     def dumped(self):
-        filename = QtWidgets.QFileDialog.getOpenFileNames(
-            self,
-            "Select Files",
-            r"C:\\images\\",
-            "Images (*.png *.jpg)"
-        )
+        filename = str(QtWidgets.QFileDialog.getOpenFileNames(None, "Select Files", "", "Dumps (*.pcap *.pcapng)"))
+        if filename:
+            path =Path(filename)
+            self.dump_choice_line.setText(str(path))
         variable.change_path(filename)
         file_name = os.path.basename("r'" + variable.path)
 
     def dataset(self):
-        filename = fd.askopenfilename(filetypes=(("xlsx", "*.xlsx"), ("all files", "*.*")))
+        filename = str(QtWidgets.QFileDialog.getOpenFileNames(None, "Select Files", "", "Excel (*.xlsx)"))
+        if filename:
+            path =Path(filename)
+            self.dataset_choice_line.setText(str(path))
         variable.change_dataset_path(filename)
         file_name = os.path.basename("r'" + variable.dataset_path)
 
     def dataset_dumped(self):
-        filename = fd.askopenfilename(filetypes=(("pcapng", "*.pcapng"), ("all files", "*.*")))
+        filename = str(QtWidgets.QFileDialog.getOpenFileNames(None, "Select Files", "", "Dumps (*.pcap *.pcapng)"))
+        if filename:
+            path =Path(filename)
+            self.dataset_dump_choice_line.setText(str(path))
         variable.change_prepare_set_path(filename)
         file_name = os.path.basename("r'" + variable.prepare_set_path)
 
     def dataset_saved(self):
-        save = fd.askdirectory()
+        save = str(QtWidgets.QFileDialog.getExistingDirectory(None, "Select Directory"))
+        if save:
+            path =Path(save)
+            self.dataset_dir_choice_line.setText(str(path))
         variable.change_save_prepare_path(save)
         res_save_path = variable.prepare_set_save_path
 
