@@ -85,7 +85,7 @@ class Ui_MainWindow(object):
         self.separator_3.setObjectName("separator_3")
         #self.separator_3.setStyleSheet("background:transparent;")
         self.dump_choice_button = QtWidgets.QPushButton(self.centralwidget)
-        self.dump_choice_button.setStyleSheet('background-color: #415374')
+        # self.dump_choice_button.setStyleSheet('background-color: #415374')
         self.dump_choice_button.setGeometry(QtCore.QRect(80, 250, 93, 28))
         self.dump_choice_button.setObjectName("dump_choice_button")
         self.dump_choice_line = QtWidgets.QLineEdit(self.centralwidget)
@@ -187,7 +187,17 @@ class Ui_MainWindow(object):
         self.dataset_choice_button.clicked.connect(self.dataset)
         self.rts_analyze.clicked.connect(start_rts_in_bg)
         self.rts_stop.clicked.connect(variable.rts_analyze_stop)
+        self.need_mean.stateChanged.connect(self.plot_state)
+        self.need_saved.stateChanged.connect(self.plot_state)
+        self.dump_choice_line.textChanged[str].connect(variable.change_path)
+        self.dir_choice_line.textChanged[str].connect(variable.change_save_path)
+        self.dataset_choice_line.textChanged[str].connect(variable.change_dataset_path)
+        self.dataset_dump_choice_line.textChanged[str].connect(variable.change_prepare_set_path)
+        self.dataset_dir_choice_line.textChanged[str].connect(variable.change_save_prepare_path)
 
+    def plot_state(self):
+        variable.change_mean_diag(self.need_mean.isChecked())
+        variable.change_save_diag(self.need_saved.isChecked())
 
     def block_ui(self):
         self.pusk.setEnabled(False)
@@ -324,45 +334,42 @@ class Ui_MainWindow(object):
         self.rb3.setEnabled(True)
         self.rb4.setEnabled(True)
 
-    def saved(self):
-        save_dir_path = str(QtWidgets.QFileDialog.getExistingDirectory(None, "Select Directory"))
-        if save_dir_path:
-            path =Path(save_dir_path)
-            self.dir_choice_line.setText(str(path))
-        variable.change_save_path(save_dir_path)
-        res_save_path = variable.path_of_save
-
     def dumped(self):
         filename = str(QtWidgets.QFileDialog.getOpenFileNames(None, "Select Files", "", "Dumps (*.pcap *.pcapng)"))
-        if filename:
-            path =Path(filename)
-            self.dump_choice_line.setText(str(path))
+        filename = filename[:-30]
+        filename = filename[3:]
+        filename = os.path.normpath(filename)
+        self.dump_choice_line.setText(str(filename))
         variable.change_path(filename)
-        file_name = os.path.basename("r'" + variable.path)
 
-    def dataset(self):
-        filename = str(QtWidgets.QFileDialog.getOpenFileNames(None, "Select Files", "", "Excel (*.xlsx)"))
-        if filename:
-            path =Path(filename)
-            self.dataset_choice_line.setText(str(path))
-        variable.change_dataset_path(filename)
-        file_name = os.path.basename("r'" + variable.dataset_path)
+    def saved(self):
+        save_dir_path = str(QtWidgets.QFileDialog.getExistingDirectory(None, "Select Directory"))
+        save_dir_path = os.path.normpath(save_dir_path)
+        self.dir_choice_line.setText(str(save_dir_path))
+        variable.change_save_path(save_dir_path)
 
     def dataset_dumped(self):
         filename = str(QtWidgets.QFileDialog.getOpenFileNames(None, "Select Files", "", "Dumps (*.pcap *.pcapng)"))
-        if filename:
-            path =Path(filename)
-            self.dataset_dump_choice_line.setText(str(path))
+        filename = filename[:-30]
+        filename = filename[3:]
+        filename = os.path.normpath(filename)
+        self.dataset_dump_choice_line.setText(str(filename))
         variable.change_prepare_set_path(filename)
-        file_name = os.path.basename("r'" + variable.prepare_set_path)
+        print(variable.dataset_path)
 
     def dataset_saved(self):
         save = str(QtWidgets.QFileDialog.getExistingDirectory(None, "Select Directory"))
-        if save:
-            path =Path(save)
-            self.dataset_dir_choice_line.setText(str(path))
+        save = os.path.normpath(save)
+        self.dataset_dir_choice_line.setText(str(save))
         variable.change_save_prepare_path(save)
-        res_save_path = variable.prepare_set_save_path
+
+    def dataset(self):
+        filename = str(QtWidgets.QFileDialog.getOpenFileNames(None, "Select Files", "", "Excel (*.xlsx)"))
+        filename = filename[:-21]
+        filename = filename[3:]
+        filename = os.path.normpath(filename)
+        self.dataset_choice_line.setText(str(filename))
+        variable.change_dataset_path(filename)
 
     def msg_error(self,title,mes):
             msg = QMessageBox()
@@ -396,10 +403,7 @@ def quit_program():
         os.remove(prepareset_path)
 
 
-# Получение пути дампа
-
 # Кнопка ПУСК
-
 def analyze():
     title = "Ошибка"
     ui.block_ui()
@@ -408,17 +412,16 @@ def analyze():
     if variable.mode == 1:
         #variable.change_save_diag(Check_savediag.get())
         #variable.change_mean_diag(Check_diag.get())
-
-        if variable.path is None:
+        if os.path.exists(variable.path) is False:
             ui.return_mode_state()
-            ui.msg_error(title, "Не выбран дамп для анализа")
+            ui.msg_error(title, "Не выбран или отсутствует дамп для анализа")
             return None
-        elif variable.path_of_save is None:
-            ui.msg_error(title, "Не выбрана директория для сохранения результатов")
+        elif os.path.exists(variable.path_of_save) is False:
+            ui.msg_error(title, "Не выбрана или отсутствует директория для сохранения результатов")
             ui.return_mode_state()
             return None
         elif not (os.path.isfile('svm_model.joblib' or 'knn_model.joblib' or 'boost_model.joblib')):
-            ui.msg_error(title, "Одна из моделей не обучена")
+            ui.msg_error(title, "Одна или более из моделей не обучена")
             ui.return_mode_state()
             return None
         else:
@@ -430,9 +433,9 @@ def analyze():
             msg = "Анализ завершён.\n\nЗатраченное время: " + str(time_elapsed) + ' секунд(ы)' + '\n'
             ui.msg_res("Результаты анализа",msg)
             ui.return_mode_state()
-    elif variable.mode == 2:
-        if variable.dataset_path is None:
-            ui.msg_error(title, "Не выбран датасет для обучения")
+    elif variable.mode == 3:
+        if os.path.exists(variable.dataset_path) is False:
+            ui.msg_error(title, "Не выбран\отсутствует датасет для обучения")
             ui.return_mode_state()
             return None
         else:
@@ -454,9 +457,9 @@ def analyze():
             msg = msg1 + msg2 + msg3 + msg4
             ui.msg_res("Результаты обучения", msg)
             ui.return_mode_state()
-    elif variable.mode == 3:
-        if variable.prepare_set_path is None or variable.prepare_set_save_path is None:
-            ui.msg_error(title, "Не выбран дамп для подготовки датасета или директория для сохранения")
+    elif variable.mode == 2:
+        if os.path.exists(variable.prepare_set_path) is False or os.path.exists(variable.prepare_set_save_path) is False:
+            ui.msg_error(title, "Не выбран\отсутствует дамп для подготовки датасета или директория для сохранения")
             ui.return_mode_state()
             return None
         else:

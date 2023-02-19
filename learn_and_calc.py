@@ -33,7 +33,7 @@ def calc(filename, mode):
     outputs['boost_detect'] = y_pred_svm.tolist()
     if mode == 1:
         save_res(outputs)
-        if variable.mean_diag != 0 or variable.save_diag != 0:
+        if variable.mean_diag != False or variable.save_diag != False:
             plot(outputs)
     elif mode == 2:
         print(outputs.to_string())
@@ -111,9 +111,9 @@ def plot(df):
     plt.title("Вычисление ")
     text_g = 'Всего: ' + str(sum_all) + ' | Обнаружил SVM: ' + str(sum_prob_svm) + ' | Обнаружил k-NN: ' + str(sum_prob_knn) + ' | Обнаружил Boost: ' + str(sum_prob_boost)
     ax.text(-2.2, -1.2, text_g, fontsize=10)
-    if variable.mean_diag == 1:
+    if variable.mean_diag == True:
         plt.show()
-    if variable.save_diag == 1:
+    if variable.save_diag == True:
         plt.savefig(variable.path_of_save + '/' + strftime("%Y-%m-%d_%H-%M-%S", localtime()) + '.png')
 
 def save_res(df):

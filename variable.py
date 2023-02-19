@@ -7,8 +7,8 @@ class Variable():
         self.combo = kwargs.get('combo')
         self.path_of_save = kwargs.get('path')
         self.quit = 0
-        self.save_diag = 0
-        self.mean_diag = 0
+        self.save_diag = False
+        self.mean_diag = False
         self.svm_count = float
         self.knn_count = float
         self.boost_count = float

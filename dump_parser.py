@@ -5,8 +5,10 @@ def parser(path,dump,mode):
     parse_mode = mode
     headers = ['udp.srcport', 'udp.dstport', 'tcp.srcport', 'tcp.dstport', 'tcp.ack', 'tcp.urgent_pointer',
                'tcp.window_size_value', 'ip.len', 'ip.id', 'ip.tos', 'ip.src', 'ip.dst']
+    # Считываем пакеты с файла
     if parse_mode == 1:
         pcap = rdpcap(path)
+    # Считываем пакеты с интерфейса
     else:
         pcap = sniff(count=1)
     with open(dump, 'w', newline='') as f:

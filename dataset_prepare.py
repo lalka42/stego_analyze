@@ -4,9 +4,11 @@ import os
 from variable import variable
 from dump_parser import parser
 def dataset_prepare():
- outpath = variable.prepare_set_save_path + '/dataset.xlsx'
+ outpath = variable.prepare_set_save_path + '\dataset.xlsx'
+ outpath = os.path.normpath(outpath)
  dump_file = os.getcwd() + '\\prepareset.csv'
- parser(variable.prepare_set_path, dump_file)
+ dump_file = os.path.normpath(dump_file)
+ parser(variable.prepare_set_path, dump_file, 1)
  df = pd.read_csv(dump_file)
  df['ip.dst'].replace('', np.nan, inplace=True)
  df.dropna(subset=['ip.dst'], inplace=True)
