@@ -3,7 +3,7 @@ from tkinter import *
 from tkinter import Checkbutton
 import tkinter.filedialog as fd
 from variable import variable
-from learn_and_calc import calc, learn, rt_calc
+from learn_and_calc import calc, learn
 import os
 from tkinter import messagebox
 from dataset_prepare import dataset_prepare

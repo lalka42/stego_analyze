@@ -1,5 +1,4 @@
-from tkinter import messagebox as mb
-
+import pandas as pd
 class Variable():
     def __init__(self, **kwargs):
         self.path = kwargs.get('path')
@@ -20,6 +19,8 @@ class Variable():
         self.mode = 0
         self.check_learn = True
         self.stop_rts = False
+        self.iface = ''
+        self.rts_df = ''
 
     def change_path(self, path):
         self.path = path
@@ -68,5 +69,11 @@ class Variable():
 
     def change_check_learn(self, var):
         self.check_learn = var
+
+    def change_iface(self, iface):
+        self.iface = iface
+
+    def change_rts_df(self, df):
+        self.rts_df = df
 
 variable = Variable()

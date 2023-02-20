@@ -1,5 +1,6 @@
 import csv
 from scapy.all import *
+from variable import variable
 
 
 def parser(path, dump, mode):
@@ -11,7 +12,7 @@ def parser(path, dump, mode):
         pcap = rdpcap(path)
     # Считываем пакеты с интерфейса
     else:
-        pcap = sniff(count=1)
+        pcap = sniff(count=1, iface=variable.iface)
     with open(dump, 'w', newline='') as f:
         writer = csv.writer(f)
         writer.writerow(headers)

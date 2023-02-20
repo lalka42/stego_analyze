@@ -21,7 +21,7 @@ import time
 from dump_parser import parser
 import threading
 
-from learn_and_calc import calc, learn, rt_calc
+from learn_and_calc import calc, learn
 import os
 
 from scapy.arch.windows import get_windows_if_list
@@ -148,14 +148,19 @@ class Ui_MainWindow(object):
         self.default_learn.setObjectName("default_learn")
         self.default_learn.setStyleSheet("background:transparent;")
         self.rts_results = QtWidgets.QTableWidget(self.centralwidget)
-        self.rts_results.setGeometry(QtCore.QRect(750, 200, 441, 311))
+        self.rts_results.setGeometry(QtCore.QRect(750, 240, 441, 311))
         self.rts_results.setObjectName("rts_results")
         self.rts_analyze = QtWidgets.QPushButton(self.centralwidget)
-        self.rts_analyze.setGeometry(QtCore.QRect(770, 530, 131, 28))
+        self.rts_analyze.setGeometry(QtCore.QRect(770, 570, 131, 28))
         self.rts_analyze.setObjectName("rts_analyze")
         self.rts_stop = QtWidgets.QPushButton(self.centralwidget)
-        self.rts_stop.setGeometry(QtCore.QRect(1030, 530, 131, 28))
+        self.rts_stop.setGeometry(QtCore.QRect(1030, 570, 131, 28))
         self.rts_stop.setObjectName("rts_stop")
+
+        self.iface_choice = QtWidgets.QComboBox(self.centralwidget)
+
+        self.iface_choice.setGeometry(QtCore.QRect(750, 200, 441, 28))
+
         self.spravka = QtWidgets.QPushButton(self.centralwidget)
         self.spravka.setGeometry(QtCore.QRect(555, 500, 121, 28))
         self.spravka.setObjectName("spravka")
@@ -197,8 +202,8 @@ class Ui_MainWindow(object):
         self.dataset_dump_choice_button.clicked.connect(self.dataset_dumped)
         self.dataset_dir_choice_button.clicked.connect(self.dataset_saved)
         self.dataset_choice_button.clicked.connect(self.dataset)
-       #self.rts_analyze.clicked.connect(start_rts_in_bg)
-        self.rts_analyze.clicked.connect(self.rts_widget)
+        self.rts_analyze.clicked.connect(start_rts_in_bg)
+        #self.rts_analyze.clicked.connect(rts_analyze_func)
         self.rts_stop.clicked.connect(variable.rts_analyze_stop)
         self.need_mean.stateChanged.connect(self.plot_state)
         self.need_saved.stateChanged.connect(self.plot_state)
@@ -207,6 +212,7 @@ class Ui_MainWindow(object):
         self.dataset_choice_line.textChanged[str].connect(variable.change_dataset_path)
         self.dataset_dump_choice_line.textChanged[str].connect(variable.change_prepare_set_path)
         self.dataset_dir_choice_line.textChanged[str].connect(variable.change_save_prepare_path)
+        self.iface_choice.activated[str].connect(self.iface_choiced)
 
     def plot_state(self):
         variable.change_mean_diag(self.need_mean.isChecked())
@@ -262,6 +268,7 @@ class Ui_MainWindow(object):
 
             self.rts_analyze.setEnabled(False)
             self.rts_stop.setEnabled(False)
+            self.rts_stop.setEnabled(False)
         elif mode == 2:
             self.pusk.setEnabled(True)
 
@@ -270,6 +277,7 @@ class Ui_MainWindow(object):
             self.sec_analyze(False)
 
             self.rts_analyze.setEnabled(False)
+            self.rts_stop.setEnabled(False)
             self.rts_stop.setEnabled(False)
         elif mode == 3:
             self.pusk.setEnabled(True)
@@ -280,6 +288,7 @@ class Ui_MainWindow(object):
 
             self.rts_analyze.setEnabled(False)
             self.rts_stop.setEnabled(False)
+            self.rts_stop.setEnabled(False)
         elif mode == 4:
             self.pusk.setEnabled(False)
 
@@ -289,6 +298,7 @@ class Ui_MainWindow(object):
 
             self.rts_analyze.setEnabled(True)
             self.rts_stop.setEnabled(True)
+            self.rts_iface()
 
     def dumped(self):
         filename = str(QtWidgets.QFileDialog.getOpenFileNames(None, "Select Files", "", "Dumps (*.pcap *.pcapng)"))
@@ -336,25 +346,32 @@ class Ui_MainWindow(object):
         msg.exec_()
 
 
-
-
-    def rts_widget(self):
+    def rts_iface(self):
         interfaces = pd.DataFrame(get_windows_if_list())
         filtr = interfaces['ipv4_metric'] != 0
         interfaces = pd.DataFrame(interfaces[filtr])
-        df = interfaces[['name', 'mac']]
+        df = interfaces[['name']]
+        iface_list = df['name'].tolist()
+        self.iface_choice.addItems(iface_list)
 
-        headers = df.columns.values.tolist()
+    def iface_choiced(self, text):
+        variable.change_iface(text)
+        print(variable.iface)
+
+    def rts_out(self):
+        headers = variable.rts_df.columns.values.tolist()
         self.rts_results.setColumnCount(len(headers))
         self.rts_results.setHorizontalHeaderLabels(headers)
+        self.rts_results.setSizeAdjustPolicy(
+            QtWidgets.QAbstractScrollArea.AdjustToContents)
 
-        for i, row in df.iterrows():
+        for i, row in variable.rts_df.iterrows():
             # Добавление строки
             self.rts_results.setRowCount(self.rts_results.rowCount() + 1)
 
             for j in range(self.rts_results.columnCount()):
                 self.rts_results.setItem(i, j, QTableWidgetItem(str(row[j])))
-
+        self.rts_results.resizeColumnsToContents()
 
 dump_file = os.getcwd() + '\\dump.csv'
 stop_rts = False
@@ -456,11 +473,12 @@ def start_analyze_in_bg():
 
 def start_rts_in_bg():
     threading.Thread(target=rts_analyze_func).start()
-
+    #ui.rts_out()
 
 def rts_analyze_func():
     mode = 2
     path = ''
+    print('xxx')
     while not variable.stop_rts:
         parser(mode, dump_file, path)
         calc(dump_file, mode)
