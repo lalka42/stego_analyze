@@ -12,13 +12,12 @@ from sklearn.metrics import classification_report
 
 
 def calc(filename, mode):
-
     df = pd.read_csv(filename)
     outputs = df
     df['ip.dst'].replace('', np.nan, inplace=True)
     df.dropna(subset=['ip.dst'], inplace=True)
     df.replace(np.nan, 0, inplace=True)
-    #df = df.dropna(subset=['ip.dst'], inplace=True)
+    # df = df.dropna(subset=['ip.dst'], inplace=True)
     df['ip.id'] = df['ip.id'].map(lambda x: int(str(x), 16))
 
     X = df.drop(['ip.src', 'ip.dst'], axis=1)
@@ -38,18 +37,20 @@ def calc(filename, mode):
     elif mode == 2:
         print(outputs.to_string())
 
+
 def rt_calc(filename):
     start_df = pd.read_csv(filename)
+
 
 def learn(filename):
     svm = SVC(kernel='linear')
     knn = KNeighborsClassifier(n_neighbors=3)
     boost = HistGradientBoostingClassifier()
     df = pd.read_excel(filename)
-    #del df[df.columns[0]]
+    # del df[df.columns[0]]
     check_dump = 'counter' in df.columns
     print(check_dump)
-    if check_dump == False:
+    if not check_dump:
         variable.change_check_learn(False)
         return None
     else:
@@ -98,6 +99,7 @@ def learn(filename):
         report3 = classification_report(check_test["y_pred"], check_test["y_test"])
         variable.change_metrics(report1, report2, report3)
 
+
 def plot(df):
     sum_prob_svm = df['svm_detect'].sum()
     sum_prob_knn = df['knn_detect'].sum()
@@ -109,12 +111,14 @@ def plot(df):
     explode = None
     ax.hist(vals, [1, 2, 3, 4])
     plt.title("Вычисление ")
-    text_g = 'Всего: ' + str(sum_all) + ' | Обнаружил SVM: ' + str(sum_prob_svm) + ' | Обнаружил k-NN: ' + str(sum_prob_knn) + ' | Обнаружил Boost: ' + str(sum_prob_boost)
+    text_g = 'Всего: ' + str(sum_all) + ' | Обнаружил SVM: ' + str(sum_prob_svm) + ' | Обнаружил k-NN: ' + str(
+        sum_prob_knn) + ' | Обнаружил Boost: ' + str(sum_prob_boost)
     ax.text(-2.2, -1.2, text_g, fontsize=10)
-    if variable.mean_diag == True:
+    if variable.mean_diag:
         plt.show()
-    if variable.save_diag == True:
+    if variable.save_diag:
         plt.savefig(variable.path_of_save + '/' + strftime("%Y-%m-%d_%H-%M-%S", localtime()) + '.png')
+
 
 def save_res(df):
     df.to_excel(variable.path_of_save + '/' + strftime("%Y-%m-%d_%H-%M-%S", localtime()) + '.xlsx')

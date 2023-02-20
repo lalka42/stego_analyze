@@ -1,7 +1,8 @@
 import csv
 from scapy.all import *
 
-def parser(path,dump,mode):
+
+def parser(path, dump, mode):
     parse_mode = mode
     headers = ['udp.srcport', 'udp.dstport', 'tcp.srcport', 'tcp.dstport', 'tcp.ack', 'tcp.urgent_pointer',
                'tcp.window_size_value', 'ip.len', 'ip.id', 'ip.tos', 'ip.src', 'ip.dst']

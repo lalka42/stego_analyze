@@ -11,12 +11,10 @@ import sys
 
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
+from PyQt5.QtWidgets import *
 from old_ui import *
 from variable import variable
 from pathlib import Path
-
-
-
 
 from dataset_prepare import dataset_prepare
 import time
@@ -25,6 +23,19 @@ import threading
 
 from learn_and_calc import calc, learn, rt_calc
 import os
+
+from scapy.arch.windows import get_windows_if_list
+import pandas as pd
+
+
+def msg_error(title, mes):
+    msg = QMessageBox()
+    msg.setWindowTitle(title)
+    msg.setText(mes)
+    msg.setIcon(QMessageBox.Icon.Critical)
+    msg.setStandardButtons(QMessageBox.Ok)
+    msg.exec_()
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -71,19 +82,19 @@ class Ui_MainWindow(object):
         self.separator_1.setFrameShape(QtWidgets.QFrame.VLine)
         self.separator_1.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.separator_1.setObjectName("separator_1")
-        #self.separator_1.setStyleSheet("background:transparent;")
+        # self.separator_1.setStyleSheet("background:transparent;")
         self.separator_2 = QtWidgets.QFrame(self.centralwidget)
         self.separator_2.setGeometry(QtCore.QRect(480, 130, 20, 411))
         self.separator_2.setFrameShape(QtWidgets.QFrame.VLine)
         self.separator_2.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.separator_2.setObjectName("separator_2")
-        #self.separator_2.setStyleSheet("background:transparent;")
+        # self.separator_2.setStyleSheet("background:transparent;")
         self.separator_3 = QtWidgets.QFrame(self.centralwidget)
         self.separator_3.setGeometry(QtCore.QRect(730, 130, 20, 411))
         self.separator_3.setFrameShape(QtWidgets.QFrame.VLine)
         self.separator_3.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.separator_3.setObjectName("separator_3")
-        #self.separator_3.setStyleSheet("background:transparent;")
+        # self.separator_3.setStyleSheet("background:transparent;")
         self.dump_choice_button = QtWidgets.QPushButton(self.centralwidget)
         # self.dump_choice_button.setStyleSheet('background-color: #415374')
         self.dump_choice_button.setGeometry(QtCore.QRect(80, 250, 93, 28))
@@ -136,7 +147,7 @@ class Ui_MainWindow(object):
         self.default_learn.setGeometry(QtCore.QRect(500, 290, 231, 41))
         self.default_learn.setObjectName("default_learn")
         self.default_learn.setStyleSheet("background:transparent;")
-        self.rts_results = QtWidgets.QTableView(self.centralwidget)
+        self.rts_results = QtWidgets.QTableWidget(self.centralwidget)
         self.rts_results.setGeometry(QtCore.QRect(750, 200, 441, 311))
         self.rts_results.setObjectName("rts_results")
         self.rts_analyze = QtWidgets.QPushButton(self.centralwidget)
@@ -157,6 +168,7 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
         self.working()
+
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
         MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
@@ -185,7 +197,8 @@ class Ui_MainWindow(object):
         self.dataset_dump_choice_button.clicked.connect(self.dataset_dumped)
         self.dataset_dir_choice_button.clicked.connect(self.dataset_saved)
         self.dataset_choice_button.clicked.connect(self.dataset)
-        self.rts_analyze.clicked.connect(start_rts_in_bg)
+       #self.rts_analyze.clicked.connect(start_rts_in_bg)
+        self.rts_analyze.clicked.connect(self.rts_widget)
         self.rts_stop.clicked.connect(variable.rts_analyze_stop)
         self.need_mean.stateChanged.connect(self.plot_state)
         self.need_saved.stateChanged.connect(self.plot_state)
@@ -201,138 +214,81 @@ class Ui_MainWindow(object):
 
     def block_ui(self):
         self.pusk.setEnabled(False)
-        self.dump_choice_button.setEnabled(False)
-        self.dir_choice_button.setEnabled(False)
-        self.dump_choice_line.setEnabled(False)
-        self.dir_choice_line.setEnabled(False)
-        self.need_mean.setEnabled(False)
-        self.need_saved.setEnabled(False)
 
-        self.dataset_dump_choice_button.setEnabled(False)
-        self.dataset_dir_choice_button.setEnabled(False)
-        self.dataset_dump_choice_line.setEnabled(False)
-        self.dataset_dir_choice_line.setEnabled(False)
-
-        self.dataset_choice_button.setEnabled(False)
-        self.dataset_choice_line.setEnabled(False)
-        self.default_learn.setEnabled(False)
-        self.spravka.setEnabled(False)
-        self.svm_variable.setEnabled(False)
-        self.knn_variable.setEnabled(False)
-        self.boost_variable.setEnabled(False)
+        self.sec_learning(False)
+        self.sec_prepare(False)
+        self.sec_analyze(False)
 
         self.rts_analyze.setEnabled(False)
         self.rts_stop.setEnabled(False)
 
-    def block_rb(self):
-        self.rb1.setEnabled(False)
-        self.rb2.setEnabled(False)
-        self.rb3.setEnabled(False)
-        self.rb4.setEnabled(False)
+    def sec_analyze(self, mode):
+        self.dump_choice_button.setEnabled(mode)
+        self.dir_choice_button.setEnabled(mode)
+        self.dump_choice_line.setEnabled(mode)
+        self.dir_choice_line.setEnabled(mode)
+        self.need_mean.setEnabled(mode)
+        self.need_saved.setEnabled(mode)
+
+    def sec_prepare(self, mode):
+        self.dataset_dump_choice_button.setEnabled(mode)
+        self.dataset_dir_choice_button.setEnabled(mode)
+        self.dataset_dump_choice_line.setEnabled(mode)
+        self.dataset_dir_choice_line.setEnabled(mode)
+
+    def sec_learning(self, mode):
+        self.dataset_choice_button.setEnabled(mode)
+        self.dataset_choice_line.setEnabled(mode)
+        self.default_learn.setEnabled(mode)
+        self.spravka.setEnabled(mode)
+        self.svm_variable.setEnabled(mode)
+        self.knn_variable.setEnabled(mode)
+        self.boost_variable.setEnabled(mode)
+
+    def rb_state(self, mode):
+        self.rb1.setEnabled(mode)
+        self.rb2.setEnabled(mode)
+        self.rb3.setEnabled(mode)
+        self.rb4.setEnabled(mode)
 
     def pr_mode(self, mode):
         variable.change_program_mode(mode)
         if mode == 1:
             self.pusk.setEnabled(True)
-            self.dump_choice_button.setEnabled(True)
-            self.dir_choice_button.setEnabled(True)
-            self.dump_choice_line.setEnabled(True)
-            self.dir_choice_line.setEnabled(True)
-            self.need_mean.setEnabled(True)
-            self.need_saved.setEnabled(True)
 
-            self.dataset_dump_choice_button.setEnabled(False)
-            self.dataset_dir_choice_button.setEnabled(False)
-            self.dataset_dump_choice_line.setEnabled(False)
-            self.dataset_dir_choice_line.setEnabled(False)
+            self.sec_learning(False)
+            self.sec_prepare(False)
+            self.sec_analyze(True)
 
-            self.dataset_choice_button.setEnabled(False)
-            self.dataset_choice_line.setEnabled(False)
-            self.default_learn.setEnabled(False)
-            self.spravka.setEnabled(False)
-            self.svm_variable.setEnabled(False)
-            self.knn_variable.setEnabled(False)
-            self.boost_variable.setEnabled(False)
             self.rts_analyze.setEnabled(False)
             self.rts_stop.setEnabled(False)
         elif mode == 2:
             self.pusk.setEnabled(True)
-            self.dump_choice_button.setEnabled(False)
-            self.dir_choice_button.setEnabled(False)
-            self.dump_choice_line.setEnabled(False)
-            self.dir_choice_line.setEnabled(False)
-            self.need_mean.setEnabled(False)
-            self.need_saved.setEnabled(False)
 
-            self.dataset_dump_choice_button.setEnabled(True)
-            self.dataset_dir_choice_button.setEnabled(True)
-            self.dataset_dump_choice_line.setEnabled(True)
-            self.dataset_dir_choice_line.setEnabled(True)
-
-            self.dataset_choice_button.setEnabled(False)
-            self.dataset_choice_line.setEnabled(False)
-            self.default_learn.setEnabled(False)
-            self.spravka.setEnabled(False)
-            self.svm_variable.setEnabled(False)
-            self.knn_variable.setEnabled(False)
-            self.boost_variable.setEnabled(False)
+            self.sec_learning(False)
+            self.sec_prepare(True)
+            self.sec_analyze(False)
 
             self.rts_analyze.setEnabled(False)
             self.rts_stop.setEnabled(False)
         elif mode == 3:
             self.pusk.setEnabled(True)
-            self.dump_choice_button.setEnabled(False)
-            self.dir_choice_button.setEnabled(False)
-            self.dump_choice_line.setEnabled(False)
-            self.dir_choice_line.setEnabled(False)
-            self.need_mean.setEnabled(False)
-            self.need_saved.setEnabled(False)
 
-            self.dataset_dump_choice_button.setEnabled(False)
-            self.dataset_dir_choice_button.setEnabled(False)
-            self.dataset_dump_choice_line.setEnabled(False)
-            self.dataset_dir_choice_line.setEnabled(False)
-
-            self.dataset_choice_button.setEnabled(True)
-            self.dataset_choice_line.setEnabled(True)
-            self.default_learn.setEnabled(True)
-            self.spravka.setEnabled(True)
-            self.svm_variable.setEnabled(True)
-            self.knn_variable.setEnabled(True)
-            self.boost_variable.setEnabled(True)
+            self.sec_learning(True)
+            self.sec_prepare(False)
+            self.sec_analyze(False)
 
             self.rts_analyze.setEnabled(False)
             self.rts_stop.setEnabled(False)
         elif mode == 4:
             self.pusk.setEnabled(False)
-            self.dump_choice_button.setEnabled(False)
-            self.dir_choice_button.setEnabled(False)
-            self.dump_choice_line.setEnabled(False)
-            self.dir_choice_line.setEnabled(False)
-            self.need_mean.setEnabled(False)
-            self.need_saved.setEnabled(False)
 
-            self.dataset_dump_choice_button.setEnabled(False)
-            self.dataset_dir_choice_button.setEnabled(False)
-            self.dataset_dump_choice_line.setEnabled(False)
-            self.dataset_dir_choice_line.setEnabled(False)
-
-            self.dataset_choice_button.setEnabled(False)
-            self.dataset_choice_line.setEnabled(False)
-            self.default_learn.setEnabled(False)
-            self.spravka.setEnabled(False)
-            self.svm_variable.setEnabled(False)
-            self.knn_variable.setEnabled(False)
-            self.boost_variable.setEnabled(False)
+            self.sec_learning(False)
+            self.sec_prepare(False)
+            self.sec_analyze(False)
 
             self.rts_analyze.setEnabled(True)
             self.rts_stop.setEnabled(True)
-
-    def return_mode_state(self):
-        self.rb1.setEnabled(True)
-        self.rb2.setEnabled(True)
-        self.rb3.setEnabled(True)
-        self.rb4.setEnabled(True)
 
     def dumped(self):
         filename = str(QtWidgets.QFileDialog.getOpenFileNames(None, "Select Files", "", "Dumps (*.pcap *.pcapng)"))
@@ -371,25 +327,37 @@ class Ui_MainWindow(object):
         self.dataset_choice_line.setText(str(filename))
         variable.change_dataset_path(filename)
 
-    def msg_error(self,title,mes):
-            msg = QMessageBox()
-            msg.setWindowTitle(title)
-            msg.setText(mes)
-            msg.setIcon(QMessageBox.Icon.Critical)
-            msg.setStandardButtons(QMessageBox.Ok)
-            msg.exec_()
-    def msg_res(self,title,mes):
-            msg = QMessageBox()
-            msg.setWindowTitle(title)
-            msg.setText(mes)
-            msg.setIcon(QMessageBox.Icon.Information)
-            msg.setStandardButtons(QMessageBox.Ok)
-            msg.exec_()
+    def msg_res(self, title, mes):
+        msg = QMessageBox()
+        msg.setWindowTitle(title)
+        msg.setText(mes)
+        msg.setIcon(QMessageBox.Icon.Information)
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.exec_()
+
+
+
+
+    def rts_widget(self):
+        interfaces = pd.DataFrame(get_windows_if_list())
+        filtr = interfaces['ipv4_metric'] != 0
+        interfaces = pd.DataFrame(interfaces[filtr])
+        df = interfaces[['name', 'mac']]
+
+        headers = df.columns.values.tolist()
+        self.rts_results.setColumnCount(len(headers))
+        self.rts_results.setHorizontalHeaderLabels(headers)
+
+        for i, row in df.iterrows():
+            # Добавление строки
+            self.rts_results.setRowCount(self.rts_results.rowCount() + 1)
+
+            for j in range(self.rts_results.columnCount()):
+                self.rts_results.setItem(i, j, QTableWidgetItem(str(row[j])))
 
 
 dump_file = os.getcwd() + '\\dump.csv'
 stop_rts = False
-
 
 
 # Функция завершения работы программы
@@ -407,22 +375,25 @@ def quit_program():
 def analyze():
     title = "Ошибка"
     ui.block_ui()
-    ui.block_rb()
+    ui.rb_state(False)
 
     if variable.mode == 1:
-        #variable.change_save_diag(Check_savediag.get())
-        #variable.change_mean_diag(Check_diag.get())
+
         if os.path.exists(variable.path) is False:
-            ui.return_mode_state()
-            ui.msg_error(title, "Не выбран или отсутствует дамп для анализа")
+            ui.sec_analyze(True)
+            ui.rb_state(True)
+            msg_error(title, "Не выбран или отсутствует дамп для анализа")
             return None
         elif os.path.exists(variable.path_of_save) is False:
-            ui.msg_error(title, "Не выбрана или отсутствует директория для сохранения результатов")
-            ui.return_mode_state()
+            ui.sec_analyze(True)
+            ui.rb_state(True)
+            msg_error(title, "Не выбрана или отсутствует директория для сохранения результатов")
             return None
         elif not (os.path.isfile('svm_model.joblib' or 'knn_model.joblib' or 'boost_model.joblib')):
-            ui.msg_error(title, "Одна или более из моделей не обучена")
-            ui.return_mode_state()
+            ui.sec_analyze(True)
+            ui.rb_state(True)
+            msg_error(title, "Одна или более из моделей не обучена")
+
             return None
         else:
             mode = 1
@@ -431,12 +402,14 @@ def analyze():
             calc(dump_file, mode)
             time_elapsed = "{:2.2f}".format(time.perf_counter() - time_start)
             msg = "Анализ завершён.\n\nЗатраченное время: " + str(time_elapsed) + ' секунд(ы)' + '\n'
-            ui.msg_res("Результаты анализа",msg)
-            ui.return_mode_state()
+            ui.msg_res("Результаты анализа", msg)
+            ui.sec_analyze(True)
+            ui.rb_state(True)
     elif variable.mode == 3:
         if os.path.exists(variable.dataset_path) is False:
-            ui.msg_error(title, "Не выбран\отсутствует датасет для обучения")
-            ui.return_mode_state()
+            msg_error(title, "Не выбран\отсутствует датасет для обучения")
+            ui.sec_learning(True)
+            ui.rb_state(True)
             return None
         else:
             time_start = time.perf_counter()
@@ -445,8 +418,9 @@ def analyze():
             variable.change_boost_count(spin_boost.get())
             learn(variable.dataset_path)
             if not variable.check_learn:
-                ui.return_mode_state()
-                ui.msg_error(title, "Датасет неправильно размечен")
+                ui.sec_learning(True)
+                ui.rb_state(True)
+                msg_error(title, "Датасет неправильно размечен")
                 return None
 
             time_elapsed = "{:2.2f}".format(time.perf_counter() - time_start)
@@ -456,38 +430,47 @@ def analyze():
             msg4 = 'Затраченное время: ' + str(time_elapsed) + ' секунд(ы)' + '\n' + '\n'
             msg = msg1 + msg2 + msg3 + msg4
             ui.msg_res("Результаты обучения", msg)
-            ui.return_mode_state()
+            ui.sec_learning(True)
+            ui.rb_state(True)
     elif variable.mode == 2:
-        if os.path.exists(variable.prepare_set_path) is False or os.path.exists(variable.prepare_set_save_path) is False:
-            ui.msg_error(title, "Не выбран\отсутствует дамп для подготовки датасета или директория для сохранения")
-            ui.return_mode_state()
+        if os.path.exists(variable.prepare_set_path) is False or os.path.exists(
+                variable.prepare_set_save_path) is False:
+            msg_error(title, "Не выбран\отсутствует дамп для подготовки датасета или директория для сохранения")
+            ui.sec_prepare(True)
+            ui.rb_state(True)
             return None
         else:
             time_start = time.perf_counter()
             dataset_prepare()
-            ui.return_mode_state()
+            ui.sec_prepare(True)
+            ui.rb_state(True)
             time_elapsed = "{:2.2f}".format(time.perf_counter() - time_start)
             msg = "Формирование датасета завершено.\n\nЗатраченное время: " + str(time_elapsed) + ' секунд(ы)' + '\n'
             ui.msg_res("Формирование датасета", msg)
             return None
 
+
 def start_analyze_in_bg():
     threading.Thread(target=analyze).start()
+
+
 def start_rts_in_bg():
     threading.Thread(target=rts_analyze_func).start()
+
 
 def rts_analyze_func():
     mode = 2
     path = ''
     while not variable.stop_rts:
         parser(mode, dump_file, path)
-        calc(dump_file,mode)
+        calc(dump_file, mode)
         time.sleep(0.1)
     return None
 
 
 if __name__ == "__main__":
     import sys
+
     app = QtWidgets.QApplication(sys.argv)
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
