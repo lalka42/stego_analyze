@@ -202,7 +202,7 @@ class Ui_MainWindow(object):
         self.dataset_dump_choice_button.clicked.connect(self.dataset_dumped)
         self.dataset_dir_choice_button.clicked.connect(self.dataset_saved)
         self.dataset_choice_button.clicked.connect(self.dataset)
-        self.rts_analyze.clicked.connect(start_rts_in_bg)
+        self.rts_analyze.clicked.connect(self.rts_out)
         #self.rts_analyze.clicked.connect(rts_analyze_func)
         self.rts_stop.clicked.connect(variable.rts_analyze_stop)
         self.need_mean.stateChanged.connect(self.plot_state)
@@ -358,20 +358,21 @@ class Ui_MainWindow(object):
         variable.change_iface(text)
         print(variable.iface)
 
-    def rts_out(self):
-        headers = variable.rts_df.columns.values.tolist()
+    def rts_out(self, real_row):
+        print(variable.rts_row)
+        headers = ['ip.src', 'ip.dst', 'svm_detect', 'knn_detect', 'boost_detect']
         self.rts_results.setColumnCount(len(headers))
         self.rts_results.setHorizontalHeaderLabels(headers)
         self.rts_results.setSizeAdjustPolicy(
             QtWidgets.QAbstractScrollArea.AdjustToContents)
-
-        for i, row in variable.rts_df.iterrows():
-            # Добавление строки
-            self.rts_results.setRowCount(self.rts_results.rowCount() + 1)
-
-            for j in range(self.rts_results.columnCount()):
-                self.rts_results.setItem(i, j, QTableWidgetItem(str(row[j])))
-        self.rts_results.resizeColumnsToContents()
+        while rts_stop is not True:
+            row = self.rts_results.rowCount()
+            self.rts_results.setRowCount(row + 1)
+            col = 0
+            for item in variable.rts_row:
+                cell = QTableWidgetItem(str(item))
+                self.rts_results.setItem(row, col, cell)
+                col += 1
 
 dump_file = os.getcwd() + '\\dump.csv'
 stop_rts = False
@@ -473,16 +474,16 @@ def start_analyze_in_bg():
 
 def start_rts_in_bg():
     threading.Thread(target=rts_analyze_func).start()
-    #ui.rts_out()
 
 def rts_analyze_func():
     mode = 2
+    variable.rts_analyze_restore()
     path = ''
-    print('xxx')
+    print(variable.stop_rts)
     while not variable.stop_rts:
         parser(mode, dump_file, path)
         calc(dump_file, mode)
-        time.sleep(0.1)
+        time.sleep(1)
     return None
 
 

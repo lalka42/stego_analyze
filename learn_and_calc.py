@@ -35,9 +35,10 @@ def calc(filename, mode):
         if variable.mean_diag != False or variable.save_diag != False:
             plot(outputs)
     elif mode == 2:
-        row = [outputs.iloc[0]['ip.src'], outputs.iloc[0]['ip.dst'], outputs.iloc[0]['svm_detect'], outputs.iloc[0]['knn_detect'], outputs.iloc[0]['boost_detect']]
-        #variable.change_rts_df(outputs)
-        print(row)
+        if outputs.iloc[0]['ip.src'] != 0:
+            row = [outputs.iloc[0]['ip.src'], outputs.iloc[0]['ip.dst'], outputs.iloc[0]['svm_detect'], outputs.iloc[0]['knn_detect'], outputs.iloc[0]['boost_detect']]
+            variable.change_rts_row(row)
+            print(row)
 
 
 def learn(filename):

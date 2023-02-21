@@ -35,6 +35,8 @@ class Variable():
 
     def rts_analyze_stop(self):
         self.stop_rts = True
+    def rts_analyze_restore(self):
+        self.stop_rts = False
     def change_save_path(self, path):
         self.path_of_save = path
 
@@ -73,7 +75,7 @@ class Variable():
     def change_iface(self, iface):
         self.iface = iface
 
-    def change_rts_df(self, df):
-        self.rts_df = df
+    def change_rts_row(self, row):
+        self.rts_row = row
 
 variable = Variable()
