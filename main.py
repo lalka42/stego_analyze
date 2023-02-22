@@ -12,6 +12,7 @@ import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtWidgets import *
+from PyQt5.QtGui import QFont
 from variable import variable
 import time
 from parse_and_prepare import parser, dataset_prepare
@@ -70,9 +71,16 @@ class Ui_MainWindow(object):
         self.button_group.idClicked.connect(self.pr_mode)
 
         self.label = QtWidgets.QLabel(self.centralwidget)
-        self.label.setGeometry(QtCore.QRect(450, 80, 301, 20))
+        self.label.setGeometry(QtCore.QRect(375, 80, 500, 20))
         self.label.setObjectName("label")
+        self.label.setFont(QFont('Arial', 14, QtGui.QFont.Bold))
         self.label.setStyleSheet("background:transparent;")
+
+        #self.label_2 = QtWidgets.QLabel(self.centralwidget)
+       ## self.label_2.setObjectName("label")
+       # self.label_2.setFont(QFont('Arial', 14, QtGui.QFont.Bold))
+       # self.label.setStyleSheet("background:transparent;")
+
         self.separator_1 = QtWidgets.QFrame(self.centralwidget)
         self.separator_1.setGeometry(QtCore.QRect(240, 130, 5, 411))
         self.separator_1.setFrameShape(QtWidgets.QFrame.VLine)
@@ -224,6 +232,7 @@ class Ui_MainWindow(object):
         self.rts_stop.setEnabled(False)
 
     def sec_analyze(self, mode):
+        self.pusk.setEnabled(mode)
         self.dump_choice_button.setEnabled(mode)
         self.dir_choice_button.setEnabled(mode)
         self.dump_choice_line.setEnabled(mode)
@@ -232,12 +241,14 @@ class Ui_MainWindow(object):
         self.need_saved.setEnabled(mode)
 
     def sec_prepare(self, mode):
+        self.pusk.setEnabled(mode)
         self.dataset_dump_choice_button.setEnabled(mode)
         self.dataset_dir_choice_button.setEnabled(mode)
         self.dataset_dump_choice_line.setEnabled(mode)
         self.dataset_dir_choice_line.setEnabled(mode)
 
     def sec_learning(self, mode):
+        self.pusk.setEnabled(mode)
         self.dataset_choice_button.setEnabled(mode)
         self.dataset_choice_line.setEnabled(mode)
         self.default_learn.setEnabled(mode)
@@ -261,8 +272,6 @@ class Ui_MainWindow(object):
     def pr_mode(self, mode):
         variable.change_program_mode(mode)
         if mode == 1:
-            self.pusk.setEnabled(True)
-
             self.sec_learning(False)
             self.sec_prepare(False)
             self.sec_analyze(True)
@@ -270,24 +279,18 @@ class Ui_MainWindow(object):
             self.rts_iface()
 
         elif mode == 2:
-            self.pusk.setEnabled(True)
-
             self.sec_learning(False)
             self.sec_prepare(True)
             self.sec_analyze(False)
             self.sec_rts(False)
             self.rts_iface()
         elif mode == 3:
-            self.pusk.setEnabled(True)
-
             self.sec_learning(True)
             self.sec_prepare(False)
             self.sec_analyze(False)
             self.sec_rts(False)
             self.rts_iface()
         elif mode == 4:
-            self.pusk.setEnabled(False)
-
             self.sec_learning(False)
             self.sec_prepare(False)
             self.sec_analyze(False)
@@ -399,12 +402,12 @@ def analyze():
 
     if variable.mode == 1:
 
-        if os.path.exists(variable.path) is False:
+        if variable.path is None or os.path.exists(variable.path) is False:
             ui.sec_analyze(True)
             ui.rb_state(True)
             msg_error(title, "Не выбран или отсутствует дамп для анализа")
             return None
-        elif os.path.exists(variable.path_of_save) is False:
+        elif variable.path_of_save is None or os.path.exists(variable.path_of_save) is False:
             ui.sec_analyze(True)
             ui.rb_state(True)
             msg_error(title, "Не выбрана или отсутствует директория для сохранения результатов")
@@ -426,14 +429,14 @@ def analyze():
             ui.sec_analyze(True)
             ui.rb_state(True)
     elif variable.mode == 3:
-        if os.path.exists(variable.dataset_path) is False:
+        if variable.dataset_path is None or os.path.exists(variable.dataset_path) is False:
             msg_error(title, "Не выбран\отсутствует датасет для обучения")
             ui.sec_learning(True)
             ui.rb_state(True)
             return None
         else:
             time_start = time.perf_counter()
-            # Это остатки от крутилок коэффициента тестовой выборки из Tkinter
+            # Это остатки от крутилок коэффициентов тестовой выборки из Tkinter
             # variable.change_svm_count(spin_svm.get())
             # variable.change_knn_count(spin_knn.get())
             # variable.change_boost_count(spin_boost.get())
@@ -454,8 +457,7 @@ def analyze():
             ui.sec_learning(True)
             ui.rb_state(True)
     elif variable.mode == 2:
-        if os.path.exists(variable.prepare_set_path) is False or os.path.exists(
-                variable.prepare_set_save_path) is False:
+        if os.path.exists(variable.prepare_set_path) is False or os.path.exists(variable.prepare_set_save_path) is False or variable.prepare_set_path is None or variable.prepare_set_save_path:
             msg_error(title, "Не выбран\отсутствует дамп для подготовки датасета или директория для сохранения")
             ui.sec_prepare(True)
             ui.rb_state(True)
@@ -502,3 +504,8 @@ if __name__ == "__main__":
     ui.block_ui()
     MainWindow.show()
     sys.exit(app.exec_())
+    prepareset_path = os.getcwd() + '\\prepareset.csv'
+    if os.path.exists(dump_file):
+        os.remove(dump_file)
+    if os.path.exists(prepareset_path):
+        os.remove(prepareset_path)

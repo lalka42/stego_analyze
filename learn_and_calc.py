@@ -103,19 +103,58 @@ def plot(df):
     sum_prob_knn = df['knn_detect'].sum()
     sum_prob_boost = df['boost_detect'].sum()
     sum_all = df.shape[0]
-    labels = ["Всего пакетов", "Обнаружил SVM:", "Обнаружил k-NN:", "Обнаружил Boost:"]
-    vals = [sum_all, sum_prob_svm, sum_prob_knn, sum_prob_boost]
+    x = ['Всего пакетов', 'SVM', 'k-NN', 'Boost']
+    y = [sum_all, sum_prob_svm, sum_prob_knn, sum_prob_boost]
     fig, ax = plt.subplots()
-    explode = None
-    ax.hist(vals, [1, 2, 3, 4])
-    plt.title("Вычисление ")
-    text_g = 'Всего: ' + str(sum_all) + ' | Обнаружил SVM: ' + str(sum_prob_svm) + ' | Обнаружил k-NN: ' + str(
-        sum_prob_knn) + ' | Обнаружил Boost: ' + str(sum_prob_boost)
-    ax.text(-2.2, -1.2, text_g, fontsize=10)
+    ax.bar(x, y)
+    ax.set_facecolor('seashell')
+    plt.title("Результаты анализа")
+    add_value_labels(ax)
     if variable.mean_diag:
         plt.show()
     if variable.save_diag:
         plt.savefig(variable.path_of_save + '/' + strftime("%Y-%m-%d_%H-%M-%S", localtime()) + '.png')
+
+def add_value_labels(ax, spacing=5):
+    """Add labels to the end of each bar in a bar chart.
+
+    Arguments:
+        ax (matplotlib.axes.Axes): The matplotlib object containing the axes
+            of the plot to annotate.
+        spacing (int): The distance between the labels and the bars.
+    """
+
+    # For each bar: Place a label
+    for rect in ax.patches:
+        # Get X and Y placement of label from rect.
+        y_value = rect.get_height()
+        x_value = rect.get_x() + rect.get_width() / 2
+
+        # Number of points between bar and label. Change to your liking.
+        space = spacing
+        # Vertical alignment for positive values
+        va = 'bottom'
+
+        # If value of bar is negative: Place label below bar
+        if y_value < 0:
+            # Invert space to place label below
+            space *= -1
+            # Vertically align label at top
+            va = 'top'
+
+        # Use Y value as label and format number with one decimal place
+        label = "{:.1f}".format(y_value)
+
+        # Create annotation
+        ax.annotate(
+            label,                      # Use `label` as label
+            (x_value, y_value),         # Place label at end of the bar
+            xytext=(0, space),          # Vertically shift label by `space`
+            textcoords="offset points", # Interpret `xytext` as offset in points
+            ha='center',                # Horizontally center label
+            va=va)                      # Vertically align label differently for
+                                        # positive and negative values.
+
 
 
 def save_res(df):
