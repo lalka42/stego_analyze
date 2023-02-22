@@ -1,2 +1,0 @@
-udp.srcport,udp.dstport,tcp.srcport,tcp.dstport,tcp.ack,tcp.urgent_pointer,tcp.window_size_value,ip.len,ip.id,ip.tos,ip.src,ip.dst
-40155,1900,0,0,0,0,0,155,14260,0,192.168.88.241,239.255.255.250

@@ -12,13 +12,9 @@ import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtWidgets import QMessageBox
 from PyQt5.QtWidgets import *
-from old_ui import *
 from variable import variable
-from pathlib import Path
-
-from dataset_prepare import dataset_prepare
 import time
-from dump_parser import parser
+from parse_and_prepare import parser, dataset_prepare
 import threading
 
 from learn_and_calc import calc, learn
@@ -78,28 +74,24 @@ class Ui_MainWindow(object):
         self.label.setObjectName("label")
         self.label.setStyleSheet("background:transparent;")
         self.separator_1 = QtWidgets.QFrame(self.centralwidget)
-        self.separator_1.setGeometry(QtCore.QRect(240, 130, 20, 411))
+        self.separator_1.setGeometry(QtCore.QRect(240, 130, 5, 411))
         self.separator_1.setFrameShape(QtWidgets.QFrame.VLine)
         self.separator_1.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.separator_1.setObjectName("separator_1")
-        # self.separator_1.setStyleSheet("background:transparent;")
         self.separator_2 = QtWidgets.QFrame(self.centralwidget)
-        self.separator_2.setGeometry(QtCore.QRect(480, 130, 20, 411))
+        self.separator_2.setGeometry(QtCore.QRect(480, 130, 5, 411))
         self.separator_2.setFrameShape(QtWidgets.QFrame.VLine)
         self.separator_2.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.separator_2.setObjectName("separator_2")
-        # self.separator_2.setStyleSheet("background:transparent;")
         self.separator_3 = QtWidgets.QFrame(self.centralwidget)
-        self.separator_3.setGeometry(QtCore.QRect(730, 130, 20, 411))
+        self.separator_3.setGeometry(QtCore.QRect(730, 130, 5, 411))
         self.separator_3.setFrameShape(QtWidgets.QFrame.VLine)
         self.separator_3.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.separator_3.setObjectName("separator_3")
-        # self.separator_3.setStyleSheet("background:transparent;")
         self.dump_choice_button = QtWidgets.QPushButton(self.centralwidget)
         self.dump_choice_button.setGeometry(QtCore.QRect(80, 250, 93, 28))
         self.dump_choice_button.setObjectName("dump_choice_button")
-        self.dump_choice_button.setStyleSheet(
-            "background-image: url(button.png); background-color: #415374; color: white;")
+        self.dump_choice_button.setStyleSheet("background: #415374;")
         self.dump_choice_line = QtWidgets.QLineEdit(self.centralwidget)
         self.dump_choice_line.setGeometry(QtCore.QRect(33, 200, 190, 22))
         self.dump_choice_line.setObjectName("dump_choice_line")
@@ -117,21 +109,18 @@ class Ui_MainWindow(object):
         self.dir_choice_button = QtWidgets.QPushButton(self.centralwidget)
         self.dir_choice_button.setGeometry(QtCore.QRect(60, 480, 121, 28))
         self.dir_choice_button.setObjectName("dir_choice_button")
-        self.dir_choice_button.setStyleSheet(
-            "background-image: url(button.png); background-color: #415374; color: white;")
+        self.dir_choice_button.setStyleSheet("background: #415374;")
         self.dataset_dump_choice_line = QtWidgets.QLineEdit(self.centralwidget)
         self.dataset_dump_choice_line.setGeometry(QtCore.QRect(275, 200, 190, 22))
         self.dataset_dump_choice_line.setObjectName("dataset_dump_choice_line")
         self.dataset_dump_choice_button = QtWidgets.QPushButton(self.centralwidget)
         self.dataset_dump_choice_button.setGeometry(QtCore.QRect(325, 250, 93, 28))
         self.dataset_dump_choice_button.setObjectName("dataset_dump_choice_button")
-        self.dataset_dump_choice_button.setStyleSheet(
-            "background-image: url(button.png); background-color: #415374; color: white;")
+        self.dataset_dump_choice_button.setStyleSheet("background: #415374;")
         self.dataset_dir_choice_button = QtWidgets.QPushButton(self.centralwidget)
         self.dataset_dir_choice_button.setGeometry(QtCore.QRect(300, 480, 131, 28))
         self.dataset_dir_choice_button.setObjectName("dataset_dir_choice_button")
-        self.dataset_dir_choice_button.setStyleSheet(
-            "background-image: url(button.png); background-color: #415374; color: white;")
+        self.dataset_dir_choice_button.setStyleSheet("background: #415374;")
         self.dataset_dir_choice_line = QtWidgets.QLineEdit(self.centralwidget)
         self.dataset_dir_choice_line.setGeometry(QtCore.QRect(275, 420, 190, 22))
         self.dataset_dir_choice_line.setObjectName("dataset_dir_choice_line")
@@ -141,8 +130,7 @@ class Ui_MainWindow(object):
         self.dataset_choice_button = QtWidgets.QPushButton(self.centralwidget)
         self.dataset_choice_button.setGeometry(QtCore.QRect(555, 250, 121, 28))
         self.dataset_choice_button.setObjectName("dataset_choice_button")
-        self.dataset_choice_button.setStyleSheet(
-            "background-image: url(button.png); background-color: #415374; color: white;")
+        self.dataset_choice_button.setStyleSheet("background: #415374;")
         self.svm_variable = QtWidgets.QLineEdit(self.centralwidget)
         self.svm_variable.setGeometry(QtCore.QRect(518, 360, 190, 22))
         self.svm_variable.setObjectName("svm_variable")
@@ -157,31 +145,27 @@ class Ui_MainWindow(object):
         self.default_learn.setObjectName("default_learn")
         self.default_learn.setStyleSheet("background:transparent;")
         self.rts_results = QtWidgets.QTableWidget(self.centralwidget)
-        self.rts_results.setStyleSheet("background-image: url(white.png)")
+        self.rts_results.setStyleSheet("background: white")
         self.rts_results.setGeometry(QtCore.QRect(780, 240, 392, 300))
         self.rts_results.setObjectName("rts_results")
         self.rts_analyze = QtWidgets.QPushButton(self.centralwidget)
         self.rts_analyze.setGeometry(QtCore.QRect(770, 570, 131, 28))
         self.rts_analyze.setObjectName("rts_analyze")
-        self.rts_analyze.setStyleSheet(
-            "background-image: url(run.png); background-color: #415374; color: white;")
+        self.rts_analyze.setStyleSheet("background: #1a6dc8; color: white;")
         self.rts_stop = QtWidgets.QPushButton(self.centralwidget)
         self.rts_stop.setGeometry(QtCore.QRect(1030, 570, 131, 28))
         self.rts_stop.setObjectName("rts_stop")
-        self.rts_stop.setStyleSheet(
-            "background-image: url(run.png); background-color: #415374; color: white;")
+        self.rts_stop.setStyleSheet("background: #1a6dc8; color: white;")
         self.iface_choice = QtWidgets.QComboBox(self.centralwidget)
         self.iface_choice.setGeometry(QtCore.QRect(780, 200, 392, 28))
         self.spravka = QtWidgets.QPushButton(self.centralwidget)
         self.spravka.setGeometry(QtCore.QRect(555, 500, 121, 28))
         self.spravka.setObjectName("spravka")
-        self.spravka.setStyleSheet(
-            "background-image: url(button.png); background-color: #415374; color: white;")
+        self.spravka.setStyleSheet("background: #415374;")
         self.pusk = QtWidgets.QPushButton(self.centralwidget)
         self.pusk.setGeometry(QtCore.QRect(300, 550, 131, 35))
         self.pusk.setObjectName("pusk")
-        self.pusk.setStyleSheet(
-            "background-image: url(run.png); background-color: #415374; color: white;")
+        self.pusk.setStyleSheet("background: #1a6dc8; color: white;")
         MainWindow.setCentralWidget(self.centralwidget)
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
@@ -331,7 +315,6 @@ class Ui_MainWindow(object):
         filename = os.path.normpath(filename)
         self.dataset_dump_choice_line.setText(str(filename))
         variable.change_prepare_set_path(filename)
-        print(variable.dataset_path)
 
     def dataset_saved(self):
         save = str(QtWidgets.QFileDialog.getExistingDirectory(None, "Select Directory"))
@@ -366,23 +349,26 @@ class Ui_MainWindow(object):
 
     def iface_choiced(self, text):
         variable.change_iface(text)
-        print(variable.iface)
 
     def rts_out(self, real_row):
-        print(variable.rts_row)
         headers = ['ip.src', 'ip.dst', 'SVM', 'k-NN', 'Boost']
         self.rts_results.setColumnCount(len(headers))
         self.rts_results.setHorizontalHeaderLabels(headers)
         self.rts_results.verticalHeader().setVisible(False)
+        #self.rts_results.resizeColumnsToContents()
+        self.rts_results.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.rts_results.horizontalHeader().setSectionResizeMode(0, QHeaderView.Interactive)
         row = self.rts_results.rowCount()
         self.rts_results.setRowCount(row + 1)
         col = 0
         for item in variable.rts_row:
             cell = QTableWidgetItem(str(item))
             self.rts_results.setItem(row, col, cell)
-            self.rts_results.resizeColumnsToContents()
             col += 1
         self.rts_results.scrollToBottom()
+
+
+
 
     def stop_rts(self):
         variable.rts_analyze_stop()
@@ -447,9 +433,10 @@ def analyze():
             return None
         else:
             time_start = time.perf_counter()
-            variable.change_svm_count(spin_svm.get())
-            variable.change_knn_count(spin_knn.get())
-            variable.change_boost_count(spin_boost.get())
+            # Это остатки от крутилок коэффициента тестовой выборки из Tkinter
+            # variable.change_svm_count(spin_svm.get())
+            # variable.change_knn_count(spin_knn.get())
+            # variable.change_boost_count(spin_boost.get())
             learn(variable.dataset_path)
             if not variable.check_learn:
                 ui.sec_learning(True)
@@ -497,7 +484,6 @@ def rts_analyze_func():
     mode = 2
     variable.rts_analyze_restore()
     path = ''
-    print(variable.stop_rts)
     while not variable.stop_rts:
         parser(mode, dump_file, path)
         calc(dump_file, mode)

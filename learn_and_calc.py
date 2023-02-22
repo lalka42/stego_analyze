@@ -38,7 +38,6 @@ def calc(filename, mode):
         if outputs.iloc[0]['ip.src'] != 0:
             row = [outputs.iloc[0]['ip.src'], outputs.iloc[0]['ip.dst'], outputs.iloc[0]['svm_detect'], outputs.iloc[0]['knn_detect'], outputs.iloc[0]['boost_detect']]
             variable.change_rts_row(row)
-            print(row)
 
 
 def learn(filename):
@@ -48,7 +47,7 @@ def learn(filename):
     df = pd.read_excel(filename)
     # del df[df.columns[0]]
     check_dump = 'counter' in df.columns
-    print(check_dump)
+
     if not check_dump:
         variable.change_check_learn(False)
         return None
