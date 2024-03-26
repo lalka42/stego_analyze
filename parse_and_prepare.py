@@ -4,6 +4,7 @@ from variable import variable
 import pandas as pd
 import numpy as np
 import os
+import openpyxl
 
 def parser(path, dump, mode):
     parse_mode = mode

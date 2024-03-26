@@ -280,14 +280,14 @@ class Ui_MainWindow(object):
 
         elif mode == 2:
             self.sec_learning(False)
-            self.sec_prepare(True)
             self.sec_analyze(False)
             self.sec_rts(False)
+            self.sec_prepare(True)
             self.rts_iface()
         elif mode == 3:
-            self.sec_learning(True)
             self.sec_prepare(False)
             self.sec_analyze(False)
+            self.sec_learning(True)
             self.sec_rts(False)
             self.rts_iface()
         elif mode == 4:
@@ -457,7 +457,7 @@ def analyze():
             ui.sec_learning(True)
             ui.rb_state(True)
     elif variable.mode == 2:
-        if os.path.exists(variable.prepare_set_path) is False or os.path.exists(variable.prepare_set_save_path) is False or variable.prepare_set_path is None or variable.prepare_set_save_path:
+        if os.path.exists(variable.prepare_set_path) is False or os.path.exists(variable.prepare_set_save_path) is False or variable.prepare_set_path is None or variable.prepare_set_save_path  is None:
             msg_error(title, "Не выбран\отсутствует дамп для подготовки датасета или директория для сохранения")
             ui.sec_prepare(True)
             ui.rb_state(True)
