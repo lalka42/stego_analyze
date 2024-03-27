@@ -106,7 +106,7 @@ def main():
     cnt = 0
     while len(bit_array) > 0:
         pkt = generate_packet(bit_array, dest_address, source_address)
-        time.sleep(random.uniform(0.05, 0.10))
+        #time.sleep(random.uniform(0.05, 0.10))
         send(pkt)
         cnt += 1
         print(cnt)
