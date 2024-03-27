@@ -9,16 +9,15 @@ import matplotlib.pyplot as plt
 from variable import variable
 from time import localtime, strftime
 from sklearn.metrics import classification_report
-from memory_profiler import profile
 
-def calc(filename):
 
+def calc(filename, mode):
     df = pd.read_csv(filename)
     outputs = df
     df['ip.dst'].replace('', np.nan, inplace=True)
     df.dropna(subset=['ip.dst'], inplace=True)
     df.replace(np.nan, 0, inplace=True)
-    #df = df.dropna(subset=['ip.dst'], inplace=True)
+    # df = df.dropna(subset=['ip.dst'], inplace=True)
     df['ip.id'] = df['ip.id'].map(lambda x: int(str(x), 16))
 
     X = df.drop(['ip.src', 'ip.dst'], axis=1)
@@ -26,24 +25,30 @@ def calc(filename):
     knn = load('knn_model.joblib')
     boost = load('boost_model.joblib')
     y_pred_svm = svm.predict(X)
-    outputs['svm_probability'] = y_pred_svm.tolist()
+    outputs['svm_detect'] = y_pred_svm.tolist()
     y_pred_knn = knn.predict(X)
-    outputs['knn_probability'] = y_pred_svm.tolist()
+    outputs['knn_detect'] = y_pred_svm.tolist()
     y_pred_boost = boost.predict(X)
-    outputs['boost_probability'] = y_pred_svm.tolist()
-    save_res(outputs)
-    if variable.mean_diag != 0 or variable.save_diag != 0:
-     plot(outputs)
+    outputs['boost_detect'] = y_pred_svm.tolist()
+    if mode == 1:
+        save_res(outputs)
+        if variable.mean_diag != False or variable.save_diag != False:
+            plot(outputs)
+    elif mode == 2:
+        if outputs.iloc[0]['ip.src'] != 0:
+            row = [outputs.iloc[0]['ip.src'], outputs.iloc[0]['ip.dst'], outputs.iloc[0]['svm_detect'], outputs.iloc[0]['knn_detect'], outputs.iloc[0]['boost_detect']]
+            variable.change_rts_row(row)
+
 
 def learn(filename):
     svm = SVC(kernel='linear')
     knn = KNeighborsClassifier(n_neighbors=3)
     boost = HistGradientBoostingClassifier()
     df = pd.read_excel(filename)
-    #del df[df.columns[0]]
+    # del df[df.columns[0]]
     check_dump = 'counter' in df.columns
-    print(check_dump)
-    if check_dump == False:
+
+    if not check_dump:
         variable.change_check_learn(False)
         return None
     else:
@@ -92,23 +97,65 @@ def learn(filename):
         report3 = classification_report(check_test["y_pred"], check_test["y_test"])
         variable.change_metrics(report1, report2, report3)
 
+
 def plot(df):
-    sum_prob_svm = df['svm_probability'].sum()
-    sum_prob_knn = df['knn_probability'].sum()
-    sum_prob_boost = df['boost_probability'].sum()
+    sum_prob_svm = df['svm_detect'].sum()
+    sum_prob_knn = df['knn_detect'].sum()
+    sum_prob_boost = df['boost_detect'].sum()
     sum_all = df.shape[0]
-    labels = ["Всего пакетов", "Обнаружил SVM:", "Обнаружил k-NN:", "Обнаружил Boost:"]
-    vals = [sum_all, sum_prob_svm, sum_prob_knn, sum_prob_boost]
+    x = ['Всего пакетов', 'SVM', 'k-NN', 'Boost']
+    y = [sum_all, sum_prob_svm, sum_prob_knn, sum_prob_boost]
     fig, ax = plt.subplots()
-    explode = None
-    ax.pie(vals, labels=labels, autopct='%1.1f%%', shadow=True, explode=explode)
-    plt.title("Вычисление ")
-    text_g = 'Всего: ' + str(sum_all) + ' | Обнаружил SVM: ' + str(sum_prob_svm) + ' | Обнаружил k-NN: ' + str(sum_prob_knn) + ' | Обнаружил Boost: ' + str(sum_prob_boost)
-    ax.text(-2.2, -1.2, text_g, fontsize=10)
-    if variable.mean_diag == 1:
+    ax.bar(x, y)
+    ax.set_facecolor('seashell')
+    plt.title("Результаты анализа")
+    add_value_labels(ax)
+    if variable.mean_diag:
         plt.show()
-    if variable.save_diag == 1:
+    if variable.save_diag:
         plt.savefig(variable.path_of_save + '/' + strftime("%Y-%m-%d_%H-%M-%S", localtime()) + '.png')
+
+def add_value_labels(ax, spacing=5):
+    """Add labels to the end of each bar in a bar chart.
+
+    Arguments:
+        ax (matplotlib.axes.Axes): The matplotlib object containing the axes
+            of the plot to annotate.
+        spacing (int): The distance between the labels and the bars.
+    """
+
+    # For each bar: Place a label
+    for rect in ax.patches:
+        # Get X and Y placement of label from rect.
+        y_value = rect.get_height()
+        x_value = rect.get_x() + rect.get_width() / 2
+
+        # Number of points between bar and label. Change to your liking.
+        space = spacing
+        # Vertical alignment for positive values
+        va = 'bottom'
+
+        # If value of bar is negative: Place label below bar
+        if y_value < 0:
+            # Invert space to place label below
+            space *= -1
+            # Vertically align label at top
+            va = 'top'
+
+        # Use Y value as label and format number with one decimal place
+        label = "{:.1f}".format(y_value)
+
+        # Create annotation
+        ax.annotate(
+            label,                      # Use `label` as label
+            (x_value, y_value),         # Place label at end of the bar
+            xytext=(0, space),          # Vertically shift label by `space`
+            textcoords="offset points", # Interpret `xytext` as offset in points
+            ha='center',                # Horizontally center label
+            va=va)                      # Vertically align label differently for
+                                        # positive and negative values.
+
+
 
 def save_res(df):
     df.to_excel(variable.path_of_save + '/' + strftime("%Y-%m-%d_%H-%M-%S", localtime()) + '.xlsx')

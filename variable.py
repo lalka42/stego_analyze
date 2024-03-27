@@ -1,5 +1,4 @@
-from tkinter import messagebox as mb
-
+import pandas as pd
 class Variable():
     def __init__(self, **kwargs):
         self.path = kwargs.get('path')
@@ -7,8 +6,8 @@ class Variable():
         self.combo = kwargs.get('combo')
         self.path_of_save = kwargs.get('path')
         self.quit = 0
-        self.save_diag = 0
-        self.mean_diag = 0
+        self.save_diag = False
+        self.mean_diag = False
         self.svm_count = float
         self.knn_count = float
         self.boost_count = float
@@ -17,7 +16,11 @@ class Variable():
         self.report1 = ''
         self.report2 = ''
         self.report3 = ''
+        self.mode = 0
         self.check_learn = True
+        self.stop_rts = False
+        self.iface = ''
+        self.rts_df = ''
 
     def change_path(self, path):
         self.path = path
@@ -27,6 +30,13 @@ class Variable():
     def change_dataset_path(self, path):
         self.dataset_path = path
 
+    def change_program_mode(self, mode):
+        self.mode = mode
+
+    def rts_analyze_stop(self):
+        self.stop_rts = True
+    def rts_analyze_restore(self):
+        self.stop_rts = False
     def change_save_path(self, path):
         self.path_of_save = path
 
@@ -61,5 +71,11 @@ class Variable():
 
     def change_check_learn(self, var):
         self.check_learn = var
+
+    def change_iface(self, iface):
+        self.iface = iface
+
+    def change_rts_row(self, row):
+        self.rts_row = row
 
 variable = Variable()
