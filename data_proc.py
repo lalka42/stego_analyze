@@ -98,8 +98,6 @@ class DataProcessor:
             self.add_value_labels(ax)
             if variable.mean_diag:
                 plt.show()
-            if variable.save_diag:
-                plt.savefig(variable.path_of_save + '/' + strftime("%Y-%m-%d_%H-%M-%S", localtime()) + '.png')
 
     def add_value_labels(self, ax, spacing=5):
         """Add labels to the end of each bar in a bar chart.
