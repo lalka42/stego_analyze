@@ -84,10 +84,8 @@ def iface_ip_detect():
     interfaces = pd.DataFrame(interfaces[iface_filter])
     df = interfaces[['name']]
     iface_list = df['name'].tolist()
-    # print("Available interfaces:")
     i = 1
     for iface in iface_list:
-        # print(" ",i,iface)
         i = i + 1
         if "ethernet" in iface.lower():
             iface_ip = get_if_addr(iface)
@@ -100,7 +98,7 @@ def iface_ip_detect():
 def main():
     # Configure program
     source_address = iface_ip_detect()
-    dest_address = "91.197.194.73"
+    dest_address = "91.197.194.77"
     path_to_txt_file = r'C:\Users\Nikita\Desktop\111.txt'
     bit_array = read_file_to_bit_array(path_to_txt_file)
     cnt = 0
