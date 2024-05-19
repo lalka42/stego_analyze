@@ -128,7 +128,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "Стегоанализ"))
         self.chekbox_res.setText(_translate("MainWindow", "Подробная сводка"))
         self.btn_dump.setText(_translate("MainWindow", "Выбрать"))
         self.btn_res.setText(_translate("MainWindow", "Выбрать"))
