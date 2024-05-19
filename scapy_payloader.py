@@ -72,7 +72,7 @@ def generate_packet(bit_array, dst_addr, src_addr):
                TCP(sport=src_port, dport=dst_port, ack=ack, urgptr=urg, window=wind, flags="AU", reserved=res)
     packets.append(pkt_full)
 
-    pkt = random.choice(packets)
+    pkt = pkt_full
 
     return pkt
 
@@ -98,7 +98,7 @@ def iface_ip_detect():
 def main():
     # Configure program
     source_address = iface_ip_detect()
-    dest_address = "91.197.194.77"
+    dest_address = "10.98.14.65"
     path_to_txt_file = r'C:\Users\Nikita\Desktop\111.txt'
     bit_array = read_file_to_bit_array(path_to_txt_file)
     cnt = 0

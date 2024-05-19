@@ -5,7 +5,6 @@ class DataProcessor:
     def __init__(self, **kwargs):
         self.dump_path = None
         self.res_path = None
-       # self.plot_checkbox_state = False
         self.detailed_res_state = False
         self.shorted_res = None
         self.headers = ['udp.srcport', 'udp.dstport', 'tcp.srcport', 'tcp.dstport', 'tcp.ack', 'tcp.urgent_pointer',
@@ -13,24 +12,17 @@ class DataProcessor:
                         'ip.dst']
         self.prepareset_path = os.getcwd() + '\\prepareset.csv'
 
-        # Настройки клиента
-        self.SERVER_HOST = '10.98.14.65'  # Адрес сервера (или IP)
-        self.SERVER_PORT = 65432  # Порт сервера
-        self.FILE_PATH = 'path_to_your_file.txt'  # Путь к файлу, который нужно отправить
-
-
+# Методы для смены путей к дампу/пути сохранения анализа/нужно ли получить полный анализ
     def change_dump_path(self, path):
         self.dump_path = path
 
     def change_res_path(self,path):
         self.res_path = path
 
-    def change_plot_state(self, state):
-        self.plot_checkbox_state = state
-
     def change_detailed_res_state(self, state):
         self.detailed_res_state = state
 
+    # Парсим дамп в CSV перед отправкой на сервер
     def dump_parser(self):
         pcap = rdpcap(self.dump_path)
         with open(self.prepareset_path, 'w', newline='') as f:
